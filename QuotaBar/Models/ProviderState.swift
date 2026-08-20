@@ -11,4 +11,13 @@ struct ProviderState: Sendable {
         guard let fetchedAt = quota?.fetchedAt else { return true }
         return Date().timeIntervalSince(fetchedAt) > 20 * 60
     }
+
+    /// True when this provider has never produced valid data and the last error
+    /// means it isn't set up on this machine at all (see `QuotaProvider.indicatesMissingSetup`).
+    /// Once any valid quota has been seen, the provider is never considered missing again —
+    /// stale data is better shown than hidden.
+    func isMissing(for provider: QuotaProvider) -> Bool {
+        guard quota == nil, let lastError else { return false }
+        return provider.indicatesMissingSetup(lastError)
+    }
 }
