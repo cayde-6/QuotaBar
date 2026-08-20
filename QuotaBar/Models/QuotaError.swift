@@ -8,6 +8,11 @@ enum QuotaError: Error, Sendable, Equatable {
     case keychainDenied       // user was prompted and explicitly declined Keychain access
     case keychainAccessNeeded // Keychain needs to prompt but interaction wasn't allowed (background refresh)
     case timedOut             // QuotaStore gave up waiting; the call may still be running
+    // A failure we couldn't attribute to any of the categories above. Exists so that an
+    // unrecognized error still shows up as a visible "!" with a message, instead of being
+    // mistaken for one of the specific "not set up on this machine" signals and silently
+    // hiding the provider.
+    case unexpectedFailure(String)
 
     var message: String {
         switch self {
@@ -20,6 +25,7 @@ enum QuotaError: Error, Sendable, Equatable {
         case .keychainDenied: return "Keychain access denied"
         case .keychainAccessNeeded: return "Keychain access needed — click Refresh"
         case .timedOut: return "Timed out — still waiting"
+        case .unexpectedFailure(let detail): return "Unexpected error: \(detail)"
         }
     }
 }

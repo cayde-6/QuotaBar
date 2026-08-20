@@ -80,22 +80,28 @@ struct ClaudeCredentialsStore {
         return data
     }
 
-    /// `errSecAuthFailed`/`errSecInteractionNotAllowed` mean two different things depending
-    /// on whether a prompt was even allowed to appear: with interaction allowed, they mean
-    /// the user actually declined it (`.keychainDenied`); with interaction disabled up
-    /// front, they mean the Keychain has something to ask but wasn't allowed to ask it
-    /// (`.keychainAccessNeeded`) — a background refresh hitting this isn't a denial, it's
-    /// just not the moment to prompt.
+    /// `errSecAuthFailed`/`errSecInteractionNotAllowed`/`errSecInteractionRequired` mean two
+    /// different things depending on whether a prompt was even allowed to appear: with
+    /// interaction allowed, they mean the user actually declined it (`.keychainDenied`); with
+    /// interaction disabled up front, they mean the Keychain has something to ask but wasn't
+    /// allowed to ask it (`.keychainAccessNeeded`) — a background refresh hitting this isn't a
+    /// denial, it's just not the moment to prompt.
+    ///
+    /// `.notAuthenticated` now means "hide this provider forever", so it's reserved for
+    /// `errSecItemNotFound` — the one status that actually means "there is no entry". Anything
+    /// else unrecognized (e.g. `errSecNotAvailable`, `errSecNoSuchKeychain` — the Keychain
+    /// itself being unavailable or missing) falls through to `.unexpectedFailure` instead, so a
+    /// transient Keychain problem can't be mistaken for "never signed in".
     private func classifyKeychainError(_ status: OSStatus, allowInteraction: Bool) -> QuotaError {
         switch status {
         case errSecItemNotFound:
             return .notAuthenticated
-        case errSecAuthFailed, errSecInteractionNotAllowed:
+        case errSecAuthFailed, errSecInteractionNotAllowed, errSecInteractionRequired:
             return allowInteraction ? .keychainDenied : .keychainAccessNeeded
         case errSecUserCanceled:
             return .keychainDenied
         default:
-            return .notAuthenticated
+            return .unexpectedFailure("Keychain error \(status)")
         }
     }
 

@@ -13,8 +13,10 @@ enum QuotaProvider: String, Sendable, CaseIterable {
     /// - Codex CLI reports `.cliNotFound` when the binary itself is missing, distinct
     ///   from `.notAuthenticated` (installed but not logged in).
     /// - Claude has no separate "not installed" signal — `.notAuthenticated` is raised
-    ///   exactly when neither `~/.claude/.credentials.json` nor a Keychain entry exists,
-    ///   which for Claude *is* "not set up on this machine".
+    ///   exactly when the Keychain lookup comes back `errSecItemNotFound` (no on-disk
+    ///   credentials file either), which for Claude *is* "not set up on this machine". Any
+    ///   other Keychain failure (unavailable, denied, needs interaction, ...) is classified
+    ///   separately and never reaches `.notAuthenticated`.
     func indicatesMissingSetup(_ error: QuotaError) -> Bool {
         switch self {
         case .codex: return error == .cliNotFound

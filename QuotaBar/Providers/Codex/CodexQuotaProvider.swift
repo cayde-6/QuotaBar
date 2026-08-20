@@ -33,8 +33,10 @@ actor CodexQuotaProvider: QuotaProviding {
         do {
             try process.run()
         } catch {
+            // This is a failure to launch /bin/zsh itself, not evidence that `codex` is
+            // missing — the shell hasn't even had a chance to try running it yet.
             stderrPipe.fileHandleForReading.readabilityHandler = nil
-            throw QuotaError.cliNotFound
+            throw QuotaError.unexpectedFailure("failed to launch shell: \(error.localizedDescription)")
         }
 
         defer {
@@ -59,12 +61,28 @@ actor CodexQuotaProvider: QuotaProviding {
                 return try await group.next()!
             }
         } catch {
-            // Require "codex" alongside "not found" so unrelated shell startup noise
-            // (e.g. "nvm: command not found" from .zshenv) doesn't get misread as this.
-            let stderrText = stderrCollector.text.lowercased()
-            if stderrText.contains("not found") && stderrText.contains("codex") {
-                throw QuotaError.cliNotFound
+            // The stderr text is still being drained by the readabilityHandler above so the
+            // pipe never fills up and blocks the child process — but it's no longer used to
+            // classify the failure. Matching substrings across the whole accumulated stderr
+            // turned out to be unreliable: `codex` runs through `/bin/zsh -lc`, so stderr is
+            // routinely polluted by the user's own `.zshrc`/`.zshenv` (e.g. a stray "nvm:
+            // command not found"), and `codex app-server` itself can write arbitrary text
+            // containing the word "codex" to stderr without meaning "not installed".
+            //
+            // The pipe hits EOF exactly when the shell exits, so `process.isRunning` right
+            // here can still read `true` even though the process is finishing up — checking
+            // `terminationStatus` at that instant could miss a real 127 and silently break
+            // "CLI not found" detection. Give the process a short, bounded window to actually
+            // finish before reading its exit status.
+            var waited = 0
+            while process.isRunning, waited < 20 {
+                try? await Task.sleep(for: .milliseconds(10))
+                waited += 1
             }
+            // zsh returns 127 for "command not found"; because `codex` is invoked via `exec`,
+            // that 127 becomes the exit status of the shell process itself. On the timeout
+            // path above, the process is killed with `terminate()` instead, which produces a
+            // signal-based status, not 127 — so this check doesn't misfire there.
             if !process.isRunning, process.terminationStatus == 127 {
                 throw QuotaError.cliNotFound
             }

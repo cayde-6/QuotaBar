@@ -17,13 +17,27 @@ the weekly window below. Both are **remaining** percentages, not used ones.
 | red    | under 20% |
 
 The provider icon stays neutral (it follows the menu bar's own light/dark
-appearance) so only the numbers carry meaning. Two other states:
+appearance) so only the numbers carry meaning. Three other states:
 
 - `—` instead of a number: that window has no data. This is normal — the
   Codex API does not always report both windows.
 - `!` next to the icon: the last refresh attempt failed, or the data on
   screen is older than 20 minutes. The last known-good numbers stay visible;
   open the popover to see what went wrong.
+- **No icon at all**: that provider isn't set up on this machine, so it drops
+  out of the menu bar and the popover entirely instead of sitting there
+  permanently marked `!` over nothing.
+
+A provider is only hidden when it has never returned valid data *and* the
+reason is unambiguous: the `codex` CLI isn't installed (the login shell exits
+127), or Claude Code has no credentials in `~/.claude/.credentials.json` nor in
+the Keychain. Anything that might be temporary keeps the provider visible with
+its `!` — a locked Keychain, an expired token, a network failure, a timeout, or
+`codex` installed but signed out. Install the missing CLI or sign in and the
+icon returns on the next refresh; nothing needs restarting.
+
+If neither provider is set up, the menu bar shows a single gauge glyph rather
+than collapsing to an empty item, so the popover — and `Quit` — stays reachable.
 
 Providers are independent: if one is unreachable, blocked, or slow, the other
 still updates and displays normally.
