@@ -32,15 +32,20 @@ final class QuotaStore {
     /// A plain closure is simpler here than observation-tracking machinery for a single observer.
     var onUpdate: (() -> Void)?
 
+    /// A newer release than the one running, if the periodic GitHub check found one.
+    var availableUpdate: (version: String, releaseURL: URL)? { updateChecker.availableUpdate }
+
     private let codexRefresher = ProviderRefresher(provider: CodexQuotaProvider())
     private let claudeRefresher = ProviderRefresher(provider: ClaudeQuotaProvider())
     private let refreshScheduler = RefreshScheduler()
+    private let updateChecker = UpdateChecker()
 
     init() {
         codexRefresher.onEvent = { [weak self] event in self?.apply(event, to: \.codex) }
         claudeRefresher.onEvent = { [weak self] event in self?.apply(event, to: \.claude) }
         refreshScheduler.onTick = { [weak self] userInitiated in self?.refresh(userInitiated: userInitiated) }
         refreshScheduler.mostRecentAttempt = { [weak self] in self?.mostRecentAttempt }
+        updateChecker.startPolling()
     }
 
     func start() {

@@ -10,6 +10,17 @@ struct MenuFooter: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if let availableUpdate = store.availableUpdate {
+                Button {
+                    NSWorkspace.shared.open(availableUpdate.releaseURL)
+                } label: {
+                    Text("Update available: \(availableUpdate.version)")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.primary)
+                }
+                .buttonStyle(.plain)
+            }
+
             HStack(spacing: 8) {
                 // .secondary is inherently semi-transparent, so it picks up a cast from
                 // whatever is behind it — including the footer's own material, which is

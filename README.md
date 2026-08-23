@@ -108,6 +108,17 @@ file contents, and never performs a login or token-refresh flow of its own.
 If Claude's access token has expired, QuotaBar reports that and waits — only
 Claude Code itself is allowed to refresh it.
 
+## Releases
+
+Every push to `main` triggers a GitHub Actions workflow that builds a Release
+configuration, bumps the patch version (semver, major/minor untouched), tags
+it, and publishes a GitHub Release with the zipped `.app`. QuotaBar itself
+checks that release feed on startup and every 12 hours, and shows an "Update
+available" link in the popover footer when a newer version exists. These
+builds are ad-hoc signed, not signed with an Apple Developer ID — the first
+launch of a downloaded release will be blocked by Gatekeeper. Right-click the
+app and choose **Open**, or run `xattr -cr QuotaBar.app`, to get past it.
+
 ## Manual verification
 
 To sanity-check the two data sources outside the app (without ever printing

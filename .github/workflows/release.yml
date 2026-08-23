@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Determine next version
+        id: version
+        run: |
+          set -euo pipefail
+
+          last_tag=$(git tag -l 'v*' | sort -V | tail -1)
+
+          if [ -z "$last_tag" ]; then
+            base_version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" QuotaBar/Info.plist)
+            case "$base_version" in
+              *.*.*) next_version="$base_version" ;;
+              *.*) next_version="${base_version}.0" ;;
+              *) next_version="${base_version}.0.0" ;;
+            esac
+          else
+            tag_version="${last_tag#v}"
+            if ! [[ "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Latest tag '$last_tag' is not a valid vX.Y.Z semver tag, refusing to guess the next version" >&2
+              exit 1
+            fi
+            IFS='.' read -r major minor patch <<< "$tag_version"
+            next_version="${major}.${minor}.$((patch + 1))"
+          fi
+
+          if ! [[ "$next_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Computed version '$next_version' is not a valid semver, aborting" >&2
+            exit 1
+          fi
+
+          echo "last_tag=${last_tag}" >> "$GITHUB_OUTPUT"
+          echo "next_version=${next_version}" >> "$GITHUB_OUTPUT"
+          echo "next_tag=v${next_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Write changelog
+        env:
+          LAST_TAG: ${{ steps.version.outputs.last_tag }}
+        run: |
+          if [ -z "$LAST_TAG" ]; then
+            git log --pretty=format:"- %s" > CHANGELOG.txt
+          else
+            git log "${LAST_TAG}..HEAD" --pretty=format:"- %s" > CHANGELOG.txt
+          fi
+          if [ ! -s CHANGELOG.txt ]; then
+            echo "- No changes recorded" > CHANGELOG.txt
+          fi
+
+      - name: Set app version
+        env:
+          NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $NEXT_VERSION" QuotaBar/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ github.run_number }}" QuotaBar/Info.plist
+
+      - name: Build
+        run: |
+          xcodebuild -project QuotaBar.xcodeproj -scheme QuotaBar -configuration Release -derivedDataPath build build
+
+      - name: Package
+        env:
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          cd build/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent QuotaBar.app "QuotaBar-${NEXT_TAG}.zip"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT_TAG: ${{ steps.version.outputs.next_tag }}
+        run: |
+          gh release create "$NEXT_TAG" \
+            "build/Build/Products/Release/QuotaBar-${NEXT_TAG}.zip" \
+            --title "$NEXT_TAG" \
+            --target "${{ github.sha }}" \
+            --notes-file CHANGELOG.txt
