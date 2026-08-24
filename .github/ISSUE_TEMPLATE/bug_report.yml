@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in QuotaBar behaves incorrectly
+labels:
+  - bug
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect to happen instead?
+      placeholder: |
+        I expected... but instead...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the steps that reliably trigger the issue.
+      placeholder: |
+        1. Open QuotaBar
+        2. Click on...
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      description: Find this under Apple menu > About This Mac.
+      placeholder: "14.5"
+    validations:
+      required: true
+
+  - type: input
+    id: quotabar-version
+    attributes:
+      label: QuotaBar version
+      description: The version is shown in the footer of the QuotaBar popover.
+      placeholder: "1.2.3"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-provider
+    attributes:
+      label: Affected provider
+      description: Which provider is this issue about?
+      options:
+        - Codex
+        - Claude
+        - Both
+        - Neither / the app itself
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: Logs, screenshots, or any other context that might help.
+    validations:
+      required: false

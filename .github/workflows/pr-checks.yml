@@ -1,0 +1,30 @@
+name: PR checks
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  linked-issue:
+    name: Linked issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that the PR description links an issue
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+
+          body="${BODY:-}"
+          pattern='(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)[[:space:]]+#[0-9]+'
+
+          if ! grep -Eiq "$pattern" <<< "$body"; then
+            echo "::error::The PR description must reference the issue it closes, e.g. \"Closes #123\". Open an issue describing the change before opening a PR, then link it in the description."
+            exit 1
+          fi
+
+          match=$(grep -Eio "$pattern" <<< "$body" | head -n1 || true)
+          echo "Linked issue reference found: ${match}"
