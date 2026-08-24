@@ -112,12 +112,14 @@ Claude Code itself is allowed to refresh it.
 
 Every push to `main` triggers a GitHub Actions workflow that builds a Release
 configuration, bumps the patch version (semver, major/minor untouched), tags
-it, and publishes a GitHub Release with the zipped `.app`. QuotaBar itself
-checks that release feed on startup and every 12 hours, and shows an "Update
-available" link in the popover footer when a newer version exists. These
-builds are ad-hoc signed, not signed with an Apple Developer ID — the first
-launch of a downloaded release will be blocked by Gatekeeper. Right-click the
-app and choose **Open**, or run `xattr -cr QuotaBar.app`, to get past it.
+it, and publishes a GitHub Release with a `.dmg`. Mount it, then drag
+`QuotaBar.app` onto the `Applications` alias next to it in the same window to
+install. QuotaBar itself checks that release feed on startup and every 12
+hours, and shows an "Update available" link in the popover footer when a
+newer version exists. These builds are ad-hoc signed, not signed with an
+Apple Developer ID — after copying the app to `/Applications`, its first
+launch will be blocked by Gatekeeper. Right-click the app and choose
+**Open**, or run `xattr -cr /Applications/QuotaBar.app`, to get past it.
 
 ## Manual verification
 

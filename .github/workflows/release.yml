@@ -83,8 +83,20 @@ jobs:
         env:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
-          cd build/Build/Products/Release
-          ditto -c -k --sequesterRsrc --keepParent QuotaBar.app "QuotaBar-${NEXT_TAG}.zip"
+          brew install create-dmg
+
+          create-dmg \
+            --volname "QuotaBar" \
+            --window-pos 200 120 \
+            --window-size 660 400 \
+            --icon-size 128 \
+            --icon "QuotaBar.app" 180 170 \
+            --hide-extension "QuotaBar.app" \
+            --app-drop-link 480 170 \
+            "build/Build/Products/Release/QuotaBar-${NEXT_TAG}.dmg" \
+            "build/Build/Products/Release/QuotaBar.app" || true
+
+          test -f "build/Build/Products/Release/QuotaBar-${NEXT_TAG}.dmg"
 
       - name: Create GitHub release
         env:
@@ -92,7 +104,7 @@ jobs:
           NEXT_TAG: ${{ steps.version.outputs.next_tag }}
         run: |
           gh release create "$NEXT_TAG" \
-            "build/Build/Products/Release/QuotaBar-${NEXT_TAG}.zip" \
+            "build/Build/Products/Release/QuotaBar-${NEXT_TAG}.dmg" \
             --title "$NEXT_TAG" \
             --target "${{ github.sha }}" \
             --notes-file CHANGELOG.txt
