@@ -16,3 +16,7 @@ xcuserdata/
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Release artifacts (produced by .github/workflows/release.yml)
+*.dmg
+CHANGELOG.txt

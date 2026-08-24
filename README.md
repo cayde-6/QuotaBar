@@ -1,9 +1,40 @@
-# QuotaBar
+<p align="center">
+  <img src="QuotaBar/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" alt="QuotaBar" width="128">
+</p>
 
-A tiny macOS menu bar utility that shows remaining quota for two providers —
-Codex (OpenAI) and Claude (Anthropic) — as two compact indicators in the menu
-bar, with a small popover on click. No windows, no Dock icon, no settings
-beyond a Launch at Login toggle.
+<h1 align="center">QuotaBar</h1>
+
+<p align="center">
+  <b>How much Codex and Claude you have left — in your macOS menu bar.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/cayde-6/QuotaBar/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/cayde-6/QuotaBar?style=flat-square"></a>
+  <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-black?style=flat-square">
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/github/license/cayde-6/QuotaBar?style=flat-square"></a>
+</p>
+
+QuotaBar puts two compact indicators in the menu bar — one for Codex (OpenAI),
+one for Claude (Anthropic) — each showing the quota you have **left** in the
+short and weekly windows. Click for a small popover. No windows, no Dock icon,
+no settings beyond a Launch at Login toggle.
+
+It reads the credentials the two CLIs already store on your Mac. It never logs
+in, never refreshes a token, never writes a credential anywhere.
+
+## Install
+
+**[Download the latest `.dmg`](https://github.com/cayde-6/QuotaBar/releases/latest)**, mount it,
+and drag `QuotaBar.app` onto the `Applications` alias next to it.
+
+Requires **macOS 14 (Sonoma) or later**, plus whichever CLIs you want to
+track — [`codex`](https://github.com/openai/codex) and/or
+[Claude Code](https://claude.com/claude-code), signed in. A provider you don't
+have simply doesn't appear.
+
+> **First launch is blocked by Gatekeeper.** These builds are ad-hoc signed,
+> not signed with an Apple Developer ID. Right-click the app and choose
+> **Open**, or run `xattr -cr /Applications/QuotaBar.app`. Once.
 
 ## Reading the indicators
 
@@ -16,54 +47,51 @@ the weekly window below. Both are **remaining** percentages, not used ones.
 | yellow | 20–49% |
 | red    | under 20% |
 
-The provider icon stays neutral (it follows the menu bar's own light/dark
-appearance) so only the numbers carry meaning. Three other states:
+The provider icon stays neutral — it follows the menu bar's own light/dark
+appearance — so only the numbers carry meaning. Three other states:
 
-- `—` instead of a number: that window has no data. This is normal — the
+- **`—` instead of a number** — that window has no data. This is normal: the
   Codex API does not always report both windows.
-- `!` next to the icon: the last refresh attempt failed, or the data on
-  screen is older than 20 minutes. The last known-good numbers stay visible;
-  open the popover to see what went wrong.
-- **No icon at all**: that provider isn't set up on this machine, so it drops
+- **`!` next to the icon** — the last refresh failed, or the data on screen is
+  older than 20 minutes. The last known-good numbers stay visible; open the
+  popover to see what went wrong.
+- **No icon at all** — that provider isn't set up on this machine, so it drops
   out of the menu bar and the popover entirely instead of sitting there
   permanently marked `!` over nothing.
-
-A provider is only hidden when it has never returned valid data *and* the
-reason is unambiguous: the `codex` CLI isn't installed (the login shell exits
-127), or Claude Code has no credentials in `~/.claude/.credentials.json` nor in
-the Keychain. Anything that might be temporary keeps the provider visible with
-its `!` — a locked Keychain, an expired token, a network failure, a timeout, or
-`codex` installed but signed out. Install the missing CLI or sign in and the
-icon returns on the next refresh; nothing needs restarting.
-
-If neither provider is set up, the menu bar shows a single gauge glyph rather
-than collapsing to an empty item, so the popover — and `Quit` — stays reachable.
 
 Providers are independent: if one is unreachable, blocked, or slow, the other
 still updates and displays normally.
 
-## Build and run
+`Refresh every` in the popover offers 1, 5, 15, 30 or 60 minutes (default 5).
+The choice persists across launches. Changing it restarts the timer immediately
+and does not itself trigger a refresh.
 
-1. Open `QuotaBar.xcodeproj` in Xcode.
-2. Select the `QuotaBar` scheme.
-3. Press `⌘R`.
+<details>
+<summary><b>When exactly a provider is hidden</b></summary>
 
-## Standalone install (no Xcode needed afterwards)
+A provider is hidden only when it has never returned valid data **and** the
+reason is unambiguous:
 
-Either:
+- the `codex` CLI isn't installed (the login shell exits 127), or
+- Claude Code has no credentials in `~/.claude/.credentials.json` nor in the
+  Keychain.
 
-- `Product → Archive` in Xcode, then export/install from the Organizer, or
-- Build once (`⌘B`), then copy the built `.app` — found under
-  `~/Library/Developer/Xcode/DerivedData/QuotaBar-*/Build/Products/Debug/QuotaBar.app` —
-  into `/Applications`.
+Anything that might be temporary keeps the provider visible with its `!` — a
+locked Keychain, an expired token, a network failure, a timeout, or `codex`
+installed but signed out. Install the missing CLI or sign in and the icon
+returns on the next refresh; nothing needs restarting.
 
-Once copied to `/Applications` and launched from there, Xcode is no longer
-needed to run it.
+If neither provider is set up, the menu bar shows a single gauge glyph rather
+than collapsing to an empty item, so the popover — and `Quit` — stays
+reachable.
 
-## Keychain access, and why it asks again
+</details>
+
+<details>
+<summary><b>Keychain access, and why macOS asks again</b></summary>
 
 QuotaBar reads Claude Code's own OAuth credentials from the macOS Keychain
-(item "Claude Code-credentials"), which needs your permission the first time:
+(item `Claude Code-credentials`), which needs your permission the first time:
 *"QuotaBar wants to access key 'Claude Code-credentials'"*. Choose
 **Always Allow**.
 
@@ -72,74 +100,37 @@ rewrites the Keychain item every time it refreshes its own OAuth token, and a
 rewritten item comes back with a fresh list of trusted applications — so
 QuotaBar's permission is dropped every few hours.
 
-**Background refreshes are therefore never allowed to show that prompt.**
-Only two paths may: the first refresh after launch, and pressing `Refresh`
-yourself. Everything else (the timer, waking from sleep) fails quietly
-instead, showing `!` in the menu bar and *"Keychain access needed — click
-Refresh"* in the popover. One click restores it. Without this rule the app
-would stack up system dialogs overnight.
+**Background refreshes are therefore never allowed to show that prompt.** Only
+two paths may: the first refresh after launch, and pressing `Refresh` yourself.
+Everything else (the timer, waking from sleep) fails quietly instead, showing
+`!` in the menu bar and *"Keychain access needed — click Refresh"* in the
+popover. One click restores it. Without this rule the app would stack up system
+dialogs overnight.
 
-Rebuilding also drops the grant: the project is ad-hoc signed
-(`CODE_SIGN_IDENTITY = "-"`), so the code signature changes with every build.
-For a stable signature, open **Signing & Capabilities** in Xcode, enable
-**Automatically manage signing**, and select your own Development Team.
+</details>
 
-## Refresh interval
-
-`Refresh every` in the popover: 1, 5, 15, 30 or 60 minutes, default 5. The
-choice persists across launches. Changing it restarts the timer immediately
-and does not itself trigger a refresh.
-
-## Why App Sandbox is disabled
+<details>
+<summary><b>Why App Sandbox is disabled</b></summary>
 
 App Sandbox is intentionally off, and there is no entitlements file. QuotaBar
 needs to:
 
-- Read a Keychain item created by a different application (Claude Code),
-  which sandboxed apps cannot do without a shared keychain-access-group
-  entitlement Claude Code doesn't provide.
-- Launch an external process (`codex app-server`) via a login shell, which
-  the sandbox blocks.
+- Read a Keychain item created by a different application (Claude Code), which
+  sandboxed apps cannot do without a shared keychain-access-group entitlement
+  that Claude Code doesn't provide.
+- Launch an external process (`codex app-server`) via a login shell, which the
+  sandbox blocks.
 
-## Read-only, by design
+In exchange, QuotaBar is deliberately read-only: it never writes credentials
+anywhere, never logs tokens or credential file contents, and never performs a
+login or token-refresh flow of its own. If Claude's access token has expired,
+QuotaBar reports that and waits — only Claude Code itself is allowed to refresh
+it.
 
-QuotaBar never writes credentials anywhere, never logs tokens or credential
-file contents, and never performs a login or token-refresh flow of its own.
-If Claude's access token has expired, QuotaBar reports that and waits — only
-Claude Code itself is allowed to refresh it.
+</details>
 
-## Releases
+## Licence
 
-Every push to `main` triggers a GitHub Actions workflow that builds a Release
-configuration, bumps the patch version (semver, major/minor untouched), tags
-it, and publishes a GitHub Release with a `.dmg`. Mount it, then drag
-`QuotaBar.app` onto the `Applications` alias next to it in the same window to
-install. QuotaBar itself checks that release feed on startup and every 12
-hours, and shows an "Update available" link in the popover footer when a
-newer version exists. These builds are ad-hoc signed, not signed with an
-Apple Developer ID — after copying the app to `/Applications`, its first
-launch will be blocked by Gatekeeper. Right-click the app and choose
-**Open**, or run `xattr -cr /Applications/QuotaBar.app`, to get past it.
+[MIT](LICENSE) © 2026 Maxim Egorov.
 
-## Manual verification
-
-To sanity-check the two data sources outside the app (without ever printing
-a token):
-
-```sh
-# Codex: exercises the same app-server JSON-RPC path QuotaBar uses.
-codex app-server
-# then paste, one line at a time:
-# {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"clientInfo":{"name":"test","version":"1.0.0"}}}
-# {"jsonrpc":"2.0","method":"initialized"}
-# {"jsonrpc":"2.0","id":2,"method":"account/rateLimits/read","params":null}
-
-# Claude: confirms the account has a reachable usage endpoint (status code only).
-# The token flows entirely through pipes (Keychain -> python3 -> curl's stdin via
-# `-H @-`) and never appears as a command-line argument, so it never shows up in
-# `ps` or shell history.
-security find-generic-password -s 'Claude Code-credentials' -w \
-  | python3 -c 'import json, sys; tok = json.load(sys.stdin)["claudeAiOauth"]["accessToken"]; print(f"Authorization: Bearer {tok}")' \
-  | curl -s -o /dev/null -w "%{http_code}\n" -H @- -H "anthropic-beta: oauth-2025-04-20" \
-    https://api.anthropic.com/api/oauth/usage
-```
+Not affiliated with, endorsed by, or supported by OpenAI or Anthropic.
