@@ -5,6 +5,12 @@ import Foundation
 actor CodexQuotaProvider: QuotaProviding {
     private let timeout: TimeInterval = 25
 
+    // Exit status the shell command below uses to report "codex is not on PATH". Chosen to
+    // be distinct from both 0 (success) and 127 (the shell's own "command not found", which
+    // `exec codex app-server` would otherwise also produce and which we need to keep meaning
+    // something narrower — see the comment in the catch block).
+    private let codexMissingExitStatus: Int32 = 111
+
     // codex app-server never shows system dialogs on its own, so `allowInteraction` has
     // nothing to do here — the parameter exists only to satisfy the shared
     // QuotaProviding contract that ClaudeQuotaProvider's Keychain prompt needs.
@@ -13,7 +19,10 @@ actor CodexQuotaProvider: QuotaProviding {
         // Launched through a login shell so it inherits the user's real PATH — a GUI app
         // starts with a minimal PATH and would not find `codex` or `node` otherwise.
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-lc", "exec codex app-server"]
+        // Resolve `codex` ourselves before `exec`ing it, so a shell exit status of exactly
+        // 127 can no longer mean "codex is not on PATH" — see the catch block below for why
+        // that ambiguity mattered.
+        process.arguments = ["-lc", "command -v codex >/dev/null 2>&1 || exit \(codexMissingExitStatus); exec codex app-server"]
 
         let stdinPipe = Pipe()
         let stdoutPipe = Pipe()
@@ -82,11 +91,19 @@ actor CodexQuotaProvider: QuotaProviding {
                 try? await Task.sleep(for: .milliseconds(10))
                 waited += 1
             }
-            // zsh returns 127 for "command not found"; because `codex` is invoked via `exec`,
-            // that 127 becomes the exit status of the shell process itself. On the timeout
-            // path above, the process is killed with `terminate()` instead, which produces a
-            // signal-based status, not 127 — so this check doesn't misfire there.
-            if !process.isRunning, process.terminationStatus == 127 {
+            // A bare 127 from the shell is ambiguous — it's zsh's generic "command not found",
+            // and codex is installed via npm as a shim starting `#!/usr/bin/env node`, so a
+            // *missing node* also makes running `codex` exit 127, with the real reason only on
+            // stderr. Treating any 127 as "codex not installed" hid the provider even when it
+            // was installed but broken. So the command line above resolves `codex` itself
+            // first and exits with `codexMissingExitStatus` when that fails — only that status
+            // means "not on PATH". A genuine 127 now falls through to the stderr-enrichment
+            // path below instead, so whatever actually broke (e.g. the missing node) reaches
+            // the user as visible detail rather than a silent "not found". On the timeout path
+            // above, the process is killed with `terminate()` instead, which produces a
+            // signal-based status, not `codexMissingExitStatus` — so this check doesn't
+            // misfire there.
+            if !process.isRunning, process.terminationStatus == codexMissingExitStatus {
                 throw QuotaError.cliNotFound
             }
             // stderr is detail only, never a classifier (see the comment above): it can only
@@ -101,7 +118,7 @@ actor CodexQuotaProvider: QuotaProviding {
                 // `await Task.sleep` loop rather than a blocking wait, since this runs inside
                 // an actor and blocking a cooperative thread here would stall other work on
                 // the pool, not just this call. Only done on this path — it must not slow
-                // down the successful path or the 127 check above.
+                // down the successful path or the exit-status check above.
                 var stderrWaited = 0
                 while !stderrCollector.hasReachedEndOfFile, stderrWaited < 30 {
                     try? await Task.sleep(for: .milliseconds(10))
