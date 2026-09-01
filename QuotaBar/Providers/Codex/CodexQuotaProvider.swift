@@ -25,7 +25,10 @@ actor CodexQuotaProvider: QuotaProviding {
         let stderrCollector = StderrCollector()
         stderrPipe.fileHandleForReading.readabilityHandler = { handle in
             let chunk = handle.availableData
-            if !chunk.isEmpty {
+            if chunk.isEmpty {
+                // An empty read is the EOF signal, not "nothing happened this time".
+                stderrCollector.markEndOfFile()
+            } else {
                 stderrCollector.append(chunk)
             }
         }
@@ -85,6 +88,28 @@ actor CodexQuotaProvider: QuotaProviding {
             // signal-based status, not 127 — so this check doesn't misfire there.
             if !process.isRunning, process.terminationStatus == 127 {
                 throw QuotaError.cliNotFound
+            }
+            // stderr is detail only, never a classifier (see the comment above): it can only
+            // enrich the message of a failure that's already been decided as unattributable,
+            // never change which QuotaError case gets thrown.
+            if let quotaError = error as? QuotaError,
+               case .unexpectedFailure(let detail) = quotaError {
+                // The readabilityHandler drains stderr on its own queue, and a process that
+                // died quickly (exactly the case this exists for) can already be gone by the
+                // time we get here, with its last chunk not yet delivered. Poll for the drain
+                // to actually reach EOF, bounded, so the detail isn't lost to a race — an
+                // `await Task.sleep` loop rather than a blocking wait, since this runs inside
+                // an actor and blocking a cooperative thread here would stall other work on
+                // the pool, not just this call. Only done on this path — it must not slow
+                // down the successful path or the 127 check above.
+                var stderrWaited = 0
+                while !stderrCollector.hasReachedEndOfFile, stderrWaited < 30 {
+                    try? await Task.sleep(for: .milliseconds(10))
+                    stderrWaited += 1
+                }
+                if let tail = stderrCollector.usableTail {
+                    throw QuotaError.unexpectedFailure("\(detail): \(tail)")
+                }
             }
             throw error
         }
