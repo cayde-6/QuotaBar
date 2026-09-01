@@ -57,11 +57,39 @@ struct CodexAppServerSession {
     }
 
     private func classifyRPCError(_ error: [String: Any]) -> QuotaError {
-        let message = (error["message"] as? String ?? "").lowercased()
+        let originalMessage = error["message"] as? String ?? ""
+        let message = originalMessage.lowercased()
+
+        // codex app-server reports a lost backend connection (commonly the post-wake
+        // auto-refresh firing before Wi-Fi is back) as a plain JSON-RPC error rather than
+        // a distinct error code, so the only way to recognize it is the message text. This
+        // has to run before the auth check below: its markers are more specific, and a
+        // network failure whose URL happens to contain "auth" (e.g. auth.openai.com) would
+        // otherwise be misreported as "Not signed in".
+        if message.contains("timed out") || message.contains("timeout") {
+            return .network("timeout")
+        }
+        let unreachableKeywords = ["error sending request", "connect", "network", "offline", "unreachable", "dns", "resolve"]
+        if unreachableKeywords.contains(where: { message.contains($0) }) {
+            return .network("unreachable")
+        }
+
         let authKeywords = ["auth", "login", "sign in", "unauthorized", "401"]
         if authKeywords.contains(where: { message.contains($0) }) {
             return .notAuthenticated
         }
-        return .malformedResponse
+
+        // The result parsed fine as valid JSON-RPC, so claiming the response format
+        // changed (.malformedResponse) would be wrong; .unexpectedFailure exists for
+        // exactly this — a failure we can't attribute to a known category — and keeps
+        // codex's own message visible instead of hiding it behind a generic label.
+        return .unexpectedFailure(truncatedDetail(originalMessage))
+    }
+
+    private func truncatedDetail(_ message: String) -> String {
+        let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "RPC error" }
+        guard trimmed.count > 80 else { return trimmed }
+        return String(trimmed.prefix(80)) + "…"
     }
 }
