@@ -43,7 +43,7 @@ struct CodexAppServerSession {
             return try CodexRateLimitParser.parseRateLimits(result)
         }
 
-        throw QuotaError.malformedResponse // stdout closed before we got an answer
+        throw QuotaError.unexpectedFailure("codex app-server exited without answering")
     }
 
     private func write(_ object: [String: Any], to handle: FileHandle) throws {
