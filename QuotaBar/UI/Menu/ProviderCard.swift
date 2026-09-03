@@ -21,18 +21,23 @@ struct ProviderCard: View {
             }
 
             if state.quota == nil, let error = state.lastError {
-                // Wraps instead of truncating or growing the card — card width is fixed
-                // by the equal-width HStack above, not by this text's content.
+                // Wraps up to a few lines, then truncates, with the whole message available
+                // on hover — card width is fixed by the equal-width HStack above, and an
+                // unrecognized error (codex's raw RPC text, say) must never take it over.
                 Text(error.message)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
+                    .help(error.message)
             } else {
                 if let warning = warningText(for: state) {
                     Text("⚠︎ \(warning)")
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(2)
+                        .help(warning)
                 }
                 HStack(alignment: .top, spacing: 12) {
                     QuotaWindowColumn(title: "5 HOUR", window: state.quota?.shortWindow)

@@ -108,9 +108,14 @@ actor CodexQuotaProvider: QuotaProviding {
             }
             // stderr is detail only, never a classifier (see the comment above): it can only
             // enrich the message of a failure that's already been decided as unattributable,
-            // never change which QuotaError case gets thrown.
+            // never change which QuotaError case gets thrown. And it only enriches the one
+            // failure whose reason lives solely on stderr — the child exiting without ever
+            // answering. Every other .unexpectedFailure already carries codex's own RPC
+            // message, so gluing an unrelated stderr/tracing line onto that would just add
+            // noise rather than information.
             if let quotaError = error as? QuotaError,
-               case .unexpectedFailure(let detail) = quotaError {
+               case .unexpectedFailure(let detail) = quotaError,
+               detail == CodexAppServerSession.exitedWithoutAnsweringDetail {
                 // The readabilityHandler drains stderr on its own queue, and a process that
                 // died quickly (exactly the case this exists for) can already be gone by the
                 // time we get here, with its last chunk not yet delivered. Poll for the drain

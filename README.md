@@ -54,7 +54,8 @@ appearance — so only the numbers carry meaning. Three other states:
   Codex API does not always report both windows.
 - **`!` next to the icon** — the last refresh failed, or the data on screen is
   older than 20 minutes. The last known-good numbers stay visible; open the
-  popover to see what went wrong.
+  popover to see what went wrong. The reason is kept to a line or two so it
+  can't push the numbers off the card — hover it to read one that got cut off.
 - **No icon at all** — that provider isn't set up on this machine, so it drops
   out of the menu bar and the popover entirely instead of sitting there
   permanently marked `!` over nothing.

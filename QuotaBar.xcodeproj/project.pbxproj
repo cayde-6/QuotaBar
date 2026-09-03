@@ -12,6 +12,7 @@
 		527E943244294A608449B4C9 /* ProviderQuota.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0603EC38031F4DC3B43EFE1E /* ProviderQuota.swift */; };
 		F13ACC3B68D4410DA0816F59 /* StderrCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */; };
 		315B3C05D0634E06BCAFC6C7 /* CodexRateLimitParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */; };
+		FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		0603EC38031F4DC3B43EFE1E /* ProviderQuota.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/ProviderQuota.swift; sourceTree = "<group>"; };
 		FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/StderrCollector.swift; sourceTree = "<group>"; };
 		8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/CodexRateLimitParser.swift; sourceTree = "<group>"; };
+		B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/CodexAppServerSession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +90,7 @@
 				0603EC38031F4DC3B43EFE1E /* ProviderQuota.swift */,
 				FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */,
 				8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */,
+				B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -205,6 +208,7 @@
 				527E943244294A608449B4C9 /* ProviderQuota.swift in Sources */,
 				F13ACC3B68D4410DA0816F59 /* StderrCollector.swift in Sources */,
 				315B3C05D0634E06BCAFC6C7 /* CodexRateLimitParser.swift in Sources */,
+				FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
