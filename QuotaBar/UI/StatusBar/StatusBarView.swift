@@ -69,10 +69,10 @@ struct StatusBarView: View {
             // Explicit fixed row heights (rather than the font's natural line height)
             // keep glyphs like "—" from overlapping the row below when spacing is tight.
             VStack(alignment: .trailing, spacing: 0) {
-                Text(percentText(state.quota?.shortWindow))
+                Text(percentText(state.quota?.headlineWindow))
                     .font(.system(size: 9, weight: .semibold, design: .monospaced))
                     .monospacedDigit()
-                    .foregroundStyle(palette.percentColor(state.quota?.shortWindow))
+                    .foregroundStyle(palette.percentColor(state.quota?.headlineWindow))
                     .frame(height: 9, alignment: .center)
                 Text(percentText(state.quota?.weeklyWindow))
                     .font(.system(size: 9, weight: .semibold, design: .monospaced))

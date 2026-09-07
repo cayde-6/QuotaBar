@@ -14,7 +14,7 @@ enum ClaudeUsageResponse {
             throw QuotaError.malformedResponse
         }
 
-        return ProviderQuota(shortWindow: shortWindow, weeklyWindow: weeklyWindow, fetchedAt: Date())
+        return ProviderQuota(shortWindow: shortWindow, weeklyWindow: weeklyWindow, planWindow: nil, fetchedAt: Date())
     }
 
     static func parseWindow(_ raw: Any?) -> QuotaWindow? {

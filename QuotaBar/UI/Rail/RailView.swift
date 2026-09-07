@@ -76,11 +76,11 @@ struct RailView: View {
 
     private func cell(for provider: QuotaProvider, state: ProviderState) -> some View {
         VStack(spacing: 4) {
-            QuotaRing(window: state.quota?.shortWindow, provider: provider)
-            Text(percentText(state.quota?.shortWindow))
+            QuotaRing(window: state.quota?.headlineWindow, provider: provider)
+            Text(percentText(state.quota?.headlineWindow))
                 .font(.system(size: 13, weight: .medium))
                 .monospacedDigit()
-                .foregroundStyle(state.quota?.shortWindow == nil ? Color.white.opacity(0.5) : Color.white)
+                .foregroundStyle(state.quota?.headlineWindow == nil ? Color.white.opacity(0.5) : Color.white)
         }
         .frame(width: Self.cellWidth, height: Self.cellHeight)
         // The "!" sits above the ring rather than replacing anything — the numbers stay
