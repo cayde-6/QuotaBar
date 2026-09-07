@@ -7,6 +7,19 @@ struct ProviderCard: View {
     let style: MenuStyle
 
     var body: some View {
+        // Text and level colors (QuotaLevel.menuColor) need no adjustment for the dark
+        // rail style — they already read fine on black — so `style` only picks the
+        // backing here. The system style applies `.glassCard()` to the card itself
+        // (not to a `Color.clear` background) — on macOS 26, glass applied only to a
+        // background layer pulls the card's own content into its material and blurs it.
+        if style == .dark {
+            content.background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.07)))
+        } else {
+            content.glassCard()
+        }
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 4) {
                 Image(provider.iconName)
@@ -48,18 +61,6 @@ struct ProviderCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(cardBackground)
-    }
-
-    // Text and level colors (QuotaLevel.menuColor) need no adjustment for the dark rail
-    // style — they already read fine on black — so `style` only picks the backing here.
-    @ViewBuilder
-    private var cardBackground: some View {
-        if style == .dark {
-            RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.07))
-        } else {
-            Color.clear.glassCard()
-        }
     }
 
     /// Message shown above a provider's window columns when the data is present but
