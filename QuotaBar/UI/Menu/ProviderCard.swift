@@ -15,7 +15,7 @@ struct ProviderCard: View {
         if style == .dark {
             content.background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.07)))
         } else {
-            content.glassCard()
+            content.glassCard().cardEdge()
         }
     }
 

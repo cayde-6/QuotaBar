@@ -34,4 +34,11 @@ extension View {
     func glassButton() -> some View {
         modifier(GlassButton())
     }
+
+    /// Hairline edge for the popover's inner surfaces. On macOS 26 the glass they sit on is
+    /// nearly as light as the popover's own material, so without this the card boundaries
+    /// disappear in the light appearance.
+    func cardEdge(cornerRadius: CGFloat = 14) -> some View {
+        overlay(RoundedRectangle(cornerRadius: cornerRadius).stroke(Color.primary.opacity(0.08), lineWidth: 0.5))
+    }
 }
