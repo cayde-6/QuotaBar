@@ -28,6 +28,17 @@ final class QuotaStore {
 
     static var validRefreshIntervalsMinutes: [Int] { AppSettings.validRefreshIntervalsMinutes }
 
+    /// Which output surface(s) currently show the quota readout. Changing this persists
+    /// immediately and notifies `onSurfaceModeChange` so AppDelegate can show/hide the
+    /// menu bar item and rail panel to match.
+    var surfaceMode: SurfaceMode = AppSettings.surfaceMode {
+        didSet {
+            AppSettings.surfaceMode = surfaceMode
+            onSurfaceModeChange?(surfaceMode)
+        }
+    }
+    var onSurfaceModeChange: ((SurfaceMode) -> Void)?
+
     /// Called on the main actor whenever state changes, so the status bar image can be redrawn.
     /// A plain closure is simpler here than observation-tracking machinery for a single observer.
     var onUpdate: (() -> Void)?
