@@ -12,6 +12,12 @@ final class RailPanelController {
     private var interactionView: RailInteractionView?
     private var placement: RailPlacement = AppSettings.railPlacement
     private var screenParametersObserver: NSObjectProtocol?
+    private var windowMoveObserver: NSObjectProtocol?
+
+    /// Shared with `RailView` across every `updateRootView()` call — the same instance, not
+    /// a fresh one per rebuild, so toggling `isFloating` animates instead of just changing
+    /// what the next `rootView` assignment draws.
+    private let presentation = RailPresentation()
 
     /// What the surface mode last asked for via `setVisible`. Reapplied whenever
     /// `AppDelegate` notices the visible provider set changed (it owns the one
@@ -54,6 +60,9 @@ final class RailPanelController {
             if let screenParametersObserver {
                 NotificationCenter.default.removeObserver(screenParametersObserver)
             }
+            if let windowMoveObserver {
+                NotificationCenter.default.removeObserver(windowMoveObserver)
+            }
         }
     }
 
@@ -86,7 +95,7 @@ final class RailPanelController {
         if let panel { return panel }
 
         let panel = RailPanel()
-        let hostingView = NSHostingView(rootView: RailView(store: store, edge: placement.edge))
+        let hostingView = NSHostingView(rootView: RailView(store: store, edge: placement.edge, presentation: presentation))
         panel.contentView = hostingView
         self.hostingView = hostingView
 
@@ -100,13 +109,40 @@ final class RailPanelController {
         self.interactionView = interactionView
 
         self.panel = panel
+
+        // `onDragBegan` fires on every mouseDown, plain clicks included, so it can't be the
+        // trigger for going floating — that would make the widget pop loose on an ordinary
+        // click. `didMoveNotification` only fires once the window actually moves, which
+        // `performDrag(with:)` only does once the user's gesture is a real drag; gating on
+        // `isDragging` on top of that excludes programmatic moves (`resize`, the snap
+        // animation), which either run with `isDragging` already false or are skipped by
+        // `applyVisibility` entirely while it's true — see that guard's comment.
+        windowMoveObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.didMoveNotification,
+            object: panel,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handleWindowMoved()
+            }
+        }
+
         return panel
     }
 
+    private func handleWindowMoved() {
+        guard isDragging, !presentation.isFloating else { return }
+        withAnimation(.easeOut(duration: 0.15)) {
+            presentation.isFloating = true
+        }
+    }
+
     /// Rebuilds `RailView`'s root view with the current `placement.edge` so the panel's
-    /// corner rounding stays in sync after a drag docks it to a different edge.
+    /// corner rounding stays in sync after a drag docks it to a different edge. Passes the
+    /// same `presentation` instance every time — a fresh one here would make the
+    /// docked/floating transition cut instead of animate.
     private func updateRootView() {
-        hostingView?.rootView = RailView(store: store, edge: placement.edge)
+        hostingView?.rootView = RailView(store: store, edge: placement.edge, presentation: presentation)
     }
 
     private func resize(_ panel: RailPanel, providerCount: Int) {
@@ -133,6 +169,15 @@ final class RailPanelController {
 
     private func handleClick() {
         isDragging = false
+        // A plain click sets `isDragging` too (see `onDragBegan`'s comment), and a click
+        // spanning just enough origin jitter to have briefly fired `didMoveNotification`
+        // could have raised this before `mouseUp` settled it back to a click — reset it in
+        // case that happened.
+        if presentation.isFloating {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                presentation.isFloating = false
+            }
+        }
         guard let panel, let screen = screenForPlacement() else { return }
         // Decide from the mouseDown snapshot, not a fresh `card.isShown` — see
         // cardWasShownAtMouseDown's comment for why a fresh check is wrong here.
@@ -165,6 +210,12 @@ final class RailPanelController {
         placement = newPlacement
         AppSettings.railPlacement = newPlacement
         updateRootView()
+        // Dock the shape back to its resting form alongside the frame snapping into place
+        // below, so the fillets flowing back into the edge and the panel sliding home read
+        // as one motion rather than two.
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            presentation.isFloating = false
+        }
 
         // The edge may have changed (e.g. a side dock dragged to the top), and with it the
         // panel's proportions — a vertical column and a horizontal row of the same
