@@ -53,7 +53,7 @@ struct MenuView: View {
                 if style == .dark {
                     placeholder.background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
                 } else {
-                    placeholder.glassCard()
+                    placeholder.glassCard().cardEdge()
                 }
             } else {
                 if !codexMissing {
@@ -82,7 +82,16 @@ struct MenuView: View {
     /// which have their own glass/material background per card, this row has no such
     /// backing of its own by default, and a popover this translucent otherwise leaves
     /// plain text sitting directly on the desktop image behind it.
+    @ViewBuilder
     private var statusRow: some View {
+        if style == .system {
+            statusRowContent.cardEdge(cornerRadius: 12)
+        } else {
+            statusRowContent
+        }
+    }
+
+    private var statusRowContent: some View {
         HStack(spacing: 8) {
             // .secondary is inherently semi-transparent, so it picks up a cast from
             // whatever is behind it — including this row's own material, which is itself
