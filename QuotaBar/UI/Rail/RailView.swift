@@ -8,7 +8,7 @@ struct RailView: View {
     let store: QuotaStore
     let edge: RailEdge
 
-    static let cellWidth: CGFloat = 52
+    static let cellWidth: CGFloat = 70
     static let cellHeight: CGFloat = 72
     static let cornerRadius: CGFloat = 16
 
@@ -51,7 +51,10 @@ struct RailView: View {
             }
         }
         .frame(width: size.width, height: size.height)
-        .background(backingShape.fill(Color.black.opacity(0.82)))
+        // Fully opaque, not just dark: this view lives in RailPanel, a transparent
+        // borderless window with no system material or blur behind it — any opacity here
+        // lets the desktop and whatever window is behind it show through the rail.
+        .background(backingShape.fill(Color.black))
         .overlay(backingShape.stroke(Color.white.opacity(0.12), lineWidth: 0.5))
     }
 
@@ -83,7 +86,7 @@ struct RailView: View {
         VStack(spacing: 4) {
             QuotaRing(window: state.quota?.shortWindow, provider: provider)
             Text(percentText(state.quota?.shortWindow))
-                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .font(.system(size: 13, weight: .medium))
                 .monospacedDigit()
                 .foregroundStyle(state.quota?.shortWindow == nil ? Color.white.opacity(0.5) : Color.white)
         }
