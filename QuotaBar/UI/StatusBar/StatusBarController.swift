@@ -11,23 +11,15 @@ import SwiftUI
 final class StatusBarController: NSObject {
     private let store: QuotaStore
     private let statusItem: NSStatusItem
-    private let popover: NSPopover
+    private let popover: MenuPopoverController
     private var appearanceObservation: NSKeyValueObservation?
 
-    init(store: QuotaStore) {
+    init(store: QuotaStore, popover: MenuPopoverController) {
         self.store = store
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-
-        let popover = NSPopover()
-        popover.behavior = .transient // closes automatically on an outside click
-        popover.animates = false
         self.popover = popover
 
         super.init()
-
-        // See makeContentViewController() — this is also reassigned before every
-        // subsequent show, not just set once here.
-        popover.contentViewController = makeContentViewController()
 
         if let button = statusItem.button {
             button.target = self
@@ -70,36 +62,32 @@ final class StatusBarController: NSObject {
 
     @objc private func togglePopover(_ sender: AnyObject?) {
         guard let button = statusItem.button else { return }
-        if popover.isShown {
-            popover.performClose(sender)
-        } else {
-            // NSPopover reuses the same contentViewController across show/close cycles
-            // without tearing its view down — SwiftUI's onAppear only fires once, ever —
-            // so a fresh hosting controller is needed on every open, or state read into
-            // MenuView's @State (e.g. the Launch at Login toggle) would go stale until
-            // the app restarts.
-            popover.contentViewController = makeContentViewController()
-            NSApp.activate(ignoringOtherApps: true)
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-        }
+        popover.toggle(relativeTo: button.bounds, of: button, preferredEdge: .minY, style: .system)
     }
 
     @objc private func handleScreenParametersChange() {
         render()
     }
 
-    private func makeContentViewController() -> NSHostingController<MenuView> {
-        let hosting = NSHostingController(rootView: MenuView(store: store))
-        // Without this, NSHostingController reports its size only AFTER the popover has
-        // already been positioned. AppKit's origin is bottom-left, so the popover then
-        // grows upward to fit, pushing its top off the top of the screen. Forcing the
-        // size to be known up front (from SwiftUI's own preferred content size) fixes
-        // the positioning instead of the growth.
-        hosting.sizingOptions = [.preferredContentSize]
-        return hosting
+    /// Shows or hides the status item itself, for when `SurfaceMode` says the menu bar
+    /// shouldn't be shown at all.
+    func setStatusItemVisible(_ visible: Bool) {
+        statusItem.isVisible = visible
+        // render() no-ops while hidden (see its guard below), so the image it skipped
+        // drawing while invisible would otherwise still be showing — stale — once the
+        // item comes back.
+        if visible {
+            render()
+        }
     }
 
     private func render() {
+        // Rail mode leaves the status item hidden but still updating on every store
+        // change (4 times per auto-refresh cycle) — skip the ImageRenderer work entirely
+        // for an image nobody can see. setStatusItemVisible(true) re-renders on the way
+        // back in, so the image is never stale once the item reappears.
+        guard statusItem.isVisible else { return }
+
         // Determine dark/light from the status item's own effective appearance, not
         // NSApp's — the menu bar can be in a different appearance than the app.
         let isDark = statusItem.button?.effectiveAppearance

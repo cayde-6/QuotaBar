@@ -16,8 +16,11 @@
 
 QuotaBar puts two compact indicators in the menu bar — one for Codex (OpenAI),
 one for Claude (Anthropic) — each showing the quota you have **left** in the
-short and weekly windows. Click for a small popover. No windows, no Dock icon,
-no settings beyond a Launch at Login toggle.
+short and weekly windows. Click for a small popover. No windows, no Dock icon.
+
+If you'd rather not spend menu bar width on it, the same readout can live in a
+small floating widget you park against a screen edge — see
+[Where the readout lives](#where-the-readout-lives).
 
 It reads the credentials the two CLIs already store on your Mac. It never logs
 in, never refreshes a token, never writes a credential anywhere.
@@ -63,9 +66,51 @@ appearance — so only the numbers carry meaning. Three other states:
 Providers are independent: if one is unreachable, blocked, or slow, the other
 still updates and displays normally.
 
-`Refresh every` in the popover offers 1, 5, 15, 30 or 60 minutes (default 5).
+`Refresh every` in Settings offers 1, 5, 15, 30 or 60 minutes (default 5).
 The choice persists across launches. Changing it restarts the timer immediately
 and does not itself trigger a refresh.
+
+## Where the readout lives
+
+`Show as` in Settings picks the surface: **Menu bar** (the default), **Widget**,
+or **Both**.
+
+The widget is a small dark strip that floats above your windows, with one cell
+per provider: a ring around the provider's mark for the short (5-hour) window,
+and that window's percentage under it in white. The ring is the provider's own
+colour and stays that colour whatever the number is — unlike the menu bar and
+the limits card, it is not a green / orange / red warning. `—` means that window
+has no data; `!` means the last refresh failed or the numbers are over 20
+minutes old.
+
+The weekly window isn't on the widget. Click it and a dark card opens beside it
+with both windows, their reset times, when the data was last updated, a
+`Refresh` button and a gear that opens Settings. It closes on Escape or on a
+click anywhere outside it.
+
+Drag the widget anywhere; when you let go it docks to whichever screen edge it
+ended up nearest — left, right or bottom — and stays there across launches. It
+turns to match: a column on the side edges, a row along the bottom, square on
+the docked side so it reads as part of the edge rather than as something parked
+next to it. There is deliberately no top edge; that one belongs to the menu bar.
+
+The position is remembered as a fraction along its edge rather than as pixels,
+so changing resolution or unplugging the display it lived on can't strand it
+off-screen; a display that disappears sends it back to the one with the menu
+bar.
+
+The widget stays visible on every Space and over full-screen apps — being
+visible while something else is filling the screen is most of the point. If
+neither provider is set up there is nothing to draw and the widget doesn't
+appear at all; in that case the menu bar item stays visible whatever `Show as`
+says, so Settings — and `Quit` — never becomes unreachable.
+
+## Settings
+
+There is no Dock icon and no menu bar menu, so Settings opens from the gear in
+whichever readout you have: the menu bar item's popover, or the widget's card.
+It holds the surface choice, the refresh interval, `Launch at Login`, the
+new-version notice, and `Quit`. Escape or ⌘W closes it.
 
 <details>
 <summary><b>When exactly a provider is hidden</b></summary>
@@ -83,8 +128,7 @@ installed but signed out. Install the missing CLI or sign in and the icon
 returns on the next refresh; nothing needs restarting.
 
 If neither provider is set up, the menu bar shows a single gauge glyph rather
-than collapsing to an empty item, so the popover — and `Quit` — stays
-reachable.
+than collapsing to an empty item, so Settings — and `Quit` — stays reachable.
 
 </details>
 

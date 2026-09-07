@@ -13,6 +13,8 @@
 		F13ACC3B68D4410DA0816F59 /* StderrCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */; };
 		315B3C05D0634E06BCAFC6C7 /* CodexRateLimitParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */; };
 		FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */; };
+		906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921546C30E264DF4A56BABCC /* RailPlacement.swift */; };
+		5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/StderrCollector.swift; sourceTree = "<group>"; };
 		8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/CodexRateLimitParser.swift; sourceTree = "<group>"; };
 		B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/CodexAppServerSession.swift; sourceTree = "<group>"; };
+		921546C30E264DF4A56BABCC /* RailPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/RailPlacement.swift; sourceTree = "<group>"; };
+		D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/SurfaceMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,6 +95,8 @@
 				FF0F7E1FADFF4AD0B03998C1 /* StderrCollector.swift */,
 				8102EB98D84242098DBDA736 /* CodexRateLimitParser.swift */,
 				B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */,
+				921546C30E264DF4A56BABCC /* RailPlacement.swift */,
+				D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -209,6 +215,8 @@
 				F13ACC3B68D4410DA0816F59 /* StderrCollector.swift in Sources */,
 				315B3C05D0634E06BCAFC6C7 /* CodexRateLimitParser.swift in Sources */,
 				FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */,
+				906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */,
+				5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

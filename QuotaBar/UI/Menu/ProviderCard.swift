@@ -4,6 +4,7 @@ import SwiftUI
 struct ProviderCard: View {
     let provider: QuotaProvider
     let state: ProviderState
+    let style: MenuStyle
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -47,7 +48,18 @@ struct ProviderCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .glassCard()
+        .background(cardBackground)
+    }
+
+    // Text and level colors (QuotaLevel.menuColor) need no adjustment for the dark rail
+    // style — they already read fine on black — so `style` only picks the backing here.
+    @ViewBuilder
+    private var cardBackground: some View {
+        if style == .dark {
+            RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.07))
+        } else {
+            Color.clear.glassCard()
+        }
     }
 
     /// Message shown above a provider's window columns when the data is present but
