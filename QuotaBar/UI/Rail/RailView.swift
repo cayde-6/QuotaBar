@@ -11,6 +11,10 @@ struct RailView: View {
     static let cellWidth: CGFloat = 70
     static let cellHeight: CGFloat = 72
     static let cornerRadius: CGFloat = 16
+    /// Radius of the concave fillets where the backing flares out into the docked edge — see
+    /// `RailShape`. The panel grows by twice this along the docked axis to make room for the
+    /// two flares, so this same value drives both the shape and `panelSize`.
+    static let filletRadius: CGFloat = 12
 
     /// Codex first, then Claude — same order as the menu bar and popover — excluding any
     /// provider that isn't set up on this machine (`ProviderState.isMissing`). The
@@ -21,11 +25,13 @@ struct RailView: View {
     }
 
     /// The panel's size for `edge`: a single-cell-wide column of `providerCount` cells on
-    /// a side edge, or a single-cell-tall row of `providerCount` cells on top/bottom.
+    /// a side edge, or a single-cell-tall row of `providerCount` cells on top/bottom — plus
+    /// two `filletRadius`-wide flares along the docked axis (width for `.bottom`, height for
+    /// a side edge) to make room for `RailShape`'s concave fillets.
     static func panelSize(providerCount: Int, edge: RailEdge) -> CGSize {
         edge.isHorizontal
-            ? CGSize(width: cellWidth * CGFloat(providerCount), height: cellHeight)
-            : CGSize(width: cellWidth, height: cellHeight * CGFloat(providerCount))
+            ? CGSize(width: cellWidth * CGFloat(providerCount) + 2 * filletRadius, height: cellHeight)
+            : CGSize(width: cellWidth, height: cellHeight * CGFloat(providerCount) + 2 * filletRadius)
     }
 
     private static func state(for provider: QuotaProvider, in store: QuotaStore) -> ProviderState {
@@ -42,12 +48,14 @@ struct RailView: View {
                         cell(for: provider, state: Self.state(for: provider, in: store))
                     }
                 }
+                .padding(.horizontal, Self.filletRadius)
             } else {
                 VStack(spacing: 0) {
                     ForEach(providers, id: \.self) { provider in
                         cell(for: provider, state: Self.state(for: provider, in: store))
                     }
                 }
+                .padding(.vertical, Self.filletRadius)
             }
         }
         .frame(width: size.width, height: size.height)
@@ -58,28 +66,13 @@ struct RailView: View {
         .overlay(backingShape.stroke(Color.white.opacity(0.12), lineWidth: 0.5))
     }
 
-    /// The rail's dark backing, square on the side docked to the screen edge and rounded
-    /// on the free end — so the docked side reads as flush with the screen while the free
-    /// end reads as a distinct floating pill, not a continuation of the screen's edge.
-    /// Built once here so the fill and the stroke never disagree about the shape.
-    private var backingShape: UnevenRoundedRectangle {
-        switch edge {
-        case .bottom:
-            return UnevenRoundedRectangle(
-                topLeadingRadius: Self.cornerRadius, bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0, topTrailingRadius: Self.cornerRadius
-            )
-        case .left:
-            return UnevenRoundedRectangle(
-                topLeadingRadius: 0, bottomLeadingRadius: 0,
-                bottomTrailingRadius: Self.cornerRadius, topTrailingRadius: Self.cornerRadius
-            )
-        case .right:
-            return UnevenRoundedRectangle(
-                topLeadingRadius: Self.cornerRadius, bottomLeadingRadius: Self.cornerRadius,
-                bottomTrailingRadius: 0, topTrailingRadius: 0
-            )
-        }
+    /// The rail's dark backing: flush with the screen edge on the docked side — flowing into
+    /// it through concave fillets rather than meeting it as a straight seam — and rounded on
+    /// the free end, so the free end reads as a distinct floating pill while the docked side
+    /// reads as growing out of the screen. Built once here so the fill and the stroke never
+    /// disagree about the shape.
+    private var backingShape: RailShape {
+        RailShape(edge: edge, cornerRadius: Self.cornerRadius, filletRadius: Self.filletRadius)
     }
 
     private func cell(for provider: QuotaProvider, state: ProviderState) -> some View {
