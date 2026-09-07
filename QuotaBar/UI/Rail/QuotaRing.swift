@@ -6,7 +6,7 @@ struct QuotaRing: View {
     let window: QuotaWindow?
     let provider: QuotaProvider
 
-    private static let lineWidth: CGFloat = 3
+    private static let lineWidth: CGFloat = 3.5
     private static let diameter: CGFloat = 34
     private static let hubDiameter: CGFloat = 28
 
@@ -14,8 +14,9 @@ struct QuotaRing: View {
         ZStack {
             // The track is white-with-opacity rather than the system `.secondary` because
             // the rail's backing is always dark, independent of the system's light/dark mode.
+            // 0.15 is measured off the reference's pixels, not eyeballed — don't retune it by eye.
             Circle()
-                .stroke(Color.white.opacity(0.10), style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .butt))
+                .stroke(Color.white.opacity(0.15), style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round))
 
             // Dark hub behind the mark so it reads as sitting on a disc rather than
             // hanging in the ring's empty center.
@@ -26,7 +27,7 @@ struct QuotaRing: View {
             if let window {
                 Circle()
                     .trim(from: 0, to: window.remainingPercentage / 100)
-                    .stroke(provider.accentColor, style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .butt))
+                    .stroke(provider.accentColor, style: StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round))
                     // Starts the arc at 12 o'clock instead of trim's default 3 o'clock,
                     // and trim already draws clockwise, so this alone gets both.
                     .rotationEffect(.degrees(-90))
