@@ -71,6 +71,31 @@ enum CodexRateLimitParser {
         }
     }
 
+    /// Parses the `individualLimit` block a `business`-plan account reports instead of
+    /// rolling windows: a flat spend cap with no 5-hour/weekly split. Returns nil rather
+    /// than throwing when the block is absent or unusable — plans with normal windows
+    /// simply don't have this key, and that's not an error.
+    static func parsePlanWindow(_ dict: [String: Any]) -> QuotaWindow? {
+        let resetsAt = (dict["resetsAt"] as? NSNumber).map { Date(timeIntervalSince1970: TimeInterval($0.int64Value)) }
+
+        // `remainingPercent` is already a remaining percentage, unlike the `usedPercent`
+        // on primary/secondary windows — build the window directly from it, with no
+        // 100-minus flip, or a low remaining balance would display as nearly full.
+        if let remainingPercent = (dict["remainingPercent"] as? NSNumber)?.doubleValue {
+            return QuotaWindow(remainingPercentage: max(0, min(100, remainingPercent)), resetsAt: resetsAt)
+        }
+
+        // Fallback: `limit` and `used` arrive as strings (e.g. "50000", "47.57...").
+        // Compute the remaining percentage ourselves, guarding against a zero or
+        // non-numeric limit rather than dividing by zero.
+        guard let limitString = dict["limit"] as? String, let limit = Double(limitString), limit > 0,
+              let usedString = dict["used"] as? String, let used = Double(usedString) else {
+            return nil
+        }
+        let remaining = max(0, min(100, 100 - used / limit * 100))
+        return QuotaWindow(remainingPercentage: remaining, resetsAt: resetsAt)
+    }
+
     static func extractRateLimits(_ result: [String: Any]) -> [String: Any]? {
         if let rateLimits = result["rateLimits"] as? [String: Any] {
             return rateLimits
@@ -109,6 +134,20 @@ enum CodexRateLimitParser {
             return QuotaWindow(utilization: raw.usedPercent, resetsAt: resetsAt)
         }
 
-        return ProviderQuota(shortWindow: makeWindow(shortRaw), weeklyWindow: makeWindow(weeklyRaw), fetchedAt: Date())
+        let shortWindow = makeWindow(shortRaw)
+        let weeklyWindow = makeWindow(weeklyRaw)
+
+        // The plan window is only meaningful when there are no rolling windows to show
+        // instead — a business account with primary/secondary present shouldn't also
+        // show a plan limit, since that would put two different meanings of "remaining"
+        // on screen at once.
+        let planWindow: QuotaWindow?
+        if shortWindow == nil, weeklyWindow == nil, let individualLimit = rateLimits["individualLimit"] as? [String: Any] {
+            planWindow = parsePlanWindow(individualLimit)
+        } else {
+            planWindow = nil
+        }
+
+        return ProviderQuota(shortWindow: shortWindow, weeklyWindow: weeklyWindow, planWindow: planWindow, fetchedAt: Date())
     }
 }

@@ -55,6 +55,10 @@ appearance — so only the numbers carry meaning. Three other states:
 
 - **`—` instead of a number** — that window has no data. This is normal: the
   Codex API does not always report both windows.
+- **A single `PLAN` column instead of the two windows** — some Codex plans
+  (`business`, for one) meter spend against a plan allowance instead of rolling
+  5-hour and weekly windows, and report no windows at all. QuotaBar shows that
+  allowance and its reset date in their place.
 - **`!` next to the icon** — the last refresh failed, or the data on screen is
   older than 20 minutes. The last known-good numbers stay visible; open the
   popover to see what went wrong. The reason is kept to a line or two so it

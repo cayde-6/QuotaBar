@@ -161,6 +161,46 @@ struct CodexRateLimitParserExtractTests {
     }
 }
 
+@Suite("CodexRateLimitParser.parsePlanWindow")
+struct CodexRateLimitParserPlanWindowTests {
+    @Test("remainingPercent is used as-is, not inverted into a used percentage")
+    func remainingPercentUsedAsIs() {
+        let window = CodexRateLimitParser.parsePlanWindow(["remainingPercent": 20])
+        // A remaining of 20 must stay 20 (nearly exhausted), never flip to 80.
+        #expect(window?.remainingPercentage == 20)
+    }
+
+    @Test("remainingPercent carries resetsAt through as a Unix-seconds date")
+    func remainingPercentCarriesResetsAt() {
+        let resetsAt: Int64 = 1_790_812_800
+        let window = CodexRateLimitParser.parsePlanWindow(["remainingPercent": 100, "resetsAt": resetsAt])
+        #expect(window?.resetsAt == Date(timeIntervalSince1970: TimeInterval(resetsAt)))
+    }
+
+    @Test("falls back to string limit/used when remainingPercent is absent")
+    func fallsBackToStringLimitAndUsed() {
+        let window = CodexRateLimitParser.parsePlanWindow(["limit": "50000", "used": "47.57140398025513"])
+        // remaining = 100 - used/limit*100 = 100 - 0.0951... ≈ 99.9048
+        #expect(window != nil)
+        #expect(abs(window!.remainingPercentage - 99.9048) < 0.001)
+    }
+
+    @Test("a zero limit yields nil rather than dividing by zero")
+    func zeroLimitYieldsNil() {
+        #expect(CodexRateLimitParser.parsePlanWindow(["limit": "0", "used": "10"]) == nil)
+    }
+
+    @Test("non-numeric limit/used strings yield nil")
+    func nonNumericStringsYieldNil() {
+        #expect(CodexRateLimitParser.parsePlanWindow(["limit": "lots", "used": "some"]) == nil)
+    }
+
+    @Test("an empty dict yields nil")
+    func emptyDictYieldsNil() {
+        #expect(CodexRateLimitParser.parsePlanWindow([:]) == nil)
+    }
+}
+
 @Suite("CodexRateLimitParser.parseRateLimits")
 struct CodexRateLimitParserParseTests {
     @Test("a realistic payload produces the expected short and weekly windows")
@@ -208,5 +248,46 @@ struct CodexRateLimitParserParseTests {
         let quota = try CodexRateLimitParser.parseRateLimits(payload)
         #expect(quota.shortWindow == nil)
         #expect(quota.weeklyWindow == nil)
+        #expect(quota.planWindow == nil)
+    }
+
+    @Test("a business-plan payload with no windows surfaces individualLimit as planWindow")
+    func businessPlanPayloadSurfacesPlanWindow() throws {
+        let payload: [String: Any] = [
+            "rateLimits": [
+                "primary": NSNull(),
+                "secondary": NSNull(),
+                "planType": "business",
+                "individualLimit": [
+                    "limit": "50000",
+                    "used": "47.57140398025513",
+                    "remainingPercent": 100,
+                    "resetsAt": 1_790_812_800,
+                ],
+            ],
+        ]
+        let quota = try CodexRateLimitParser.parseRateLimits(payload)
+        #expect(quota.shortWindow == nil)
+        #expect(quota.weeklyWindow == nil)
+        #expect(quota.planWindow?.remainingPercentage == 100)
+        #expect(quota.planWindow?.resetsAt == Date(timeIntervalSince1970: 1_790_812_800))
+    }
+
+    @Test("planWindow is suppressed when a rolling window is present, even with individualLimit in the payload")
+    func planWindowSuppressedWhenWindowPresent() throws {
+        let payload: [String: Any] = [
+            "rateLimits": [
+                "primary": [
+                    "usedPercent": 0,
+                    "windowDurationMins": 300,
+                ],
+                "individualLimit": [
+                    "remainingPercent": 20,
+                ],
+            ],
+        ]
+        let quota = try CodexRateLimitParser.parseRateLimits(payload)
+        #expect(quota.shortWindow != nil)
+        #expect(quota.planWindow == nil)
     }
 }
