@@ -14,7 +14,7 @@ struct RailView: View {
     /// Radius of the concave fillets where the backing flares out into the docked edge — see
     /// `RailShape`. The panel grows by twice this along the docked axis to make room for the
     /// two flares, so this same value drives both the shape and `panelSize`.
-    static let filletRadius: CGFloat = 12
+    static let filletRadius: CGFloat = 24
 
     /// Codex first, then Claude — same order as the menu bar and popover — excluding any
     /// provider that isn't set up on this machine (`ProviderState.isMissing`). The
@@ -63,7 +63,6 @@ struct RailView: View {
         // borderless window with no system material or blur behind it — any opacity here
         // lets the desktop and whatever window is behind it show through the rail.
         .background(backingShape.fill(Color.black))
-        .overlay(backingShape.stroke(Color.white.opacity(0.12), lineWidth: 0.5))
     }
 
     /// The rail's dark backing: flush with the screen edge on the docked side — flowing into
