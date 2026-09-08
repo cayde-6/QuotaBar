@@ -14,6 +14,10 @@
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/github/license/cayde-6/QuotaBar?style=flat-square"></a>
 </p>
 
+<p align="center">
+  <img src="docs/menu-bar.gif" alt="The two menu bar indicators, and the popover that opens on click">
+</p>
+
 QuotaBar puts two compact indicators in the menu bar — one for Codex (OpenAI),
 one for Claude (Anthropic) — each showing the quota you have **left** in the
 short and weekly windows. Click for a small popover. No windows, no Dock icon.
@@ -92,11 +96,19 @@ with both windows, their reset times, when the data was last updated, a
 `Refresh` button and a gear that opens Settings. It closes on Escape or on a
 click anywhere outside it.
 
+<p align="center">
+  <img src="docs/widget.gif" alt="The widget docked to the right edge, and the card it opens">
+</p>
+
 Drag the widget anywhere; when you let go it docks to whichever screen edge it
 ended up nearest — left, right or bottom — and stays there across launches. It
 turns to match: a column on the side edges, a row along the bottom, square on
 the docked side so it reads as part of the edge rather than as something parked
 next to it. There is deliberately no top edge; that one belongs to the menu bar.
+
+<p align="center">
+  <img src="docs/widget-drag.gif" alt="The widget coming loose from the edge while dragged, and snapping back when released">
+</p>
 
 The position is remembered as a fraction along its edge rather than as pixels,
 so changing resolution or unplugging the display it lived on can't strand it
