@@ -5,6 +5,7 @@ import Foundation
 actor ClaudeQuotaProvider: QuotaProviding {
     private let timeout: TimeInterval = 20
     private let credentialsStore = ClaudeCredentialsStore()
+    private var nextAutomaticAttempt: Date?
 
     /// `allowInteraction` controls whether the Keychain read below is allowed to show a
     /// system authentication prompt. Keychain interaction is disabled process-wide by
@@ -14,6 +15,12 @@ actor ClaudeQuotaProvider: QuotaProviding {
     /// QuotaStore.refresh(userInitiated:). Every other refresh path (timer, wake) passes
     /// false, so a stale/rewritten Keychain item can never pop up a system dialog on its own.
     func fetch(allowInteraction: Bool) async throws -> ProviderQuota {
+        // A manual Refresh may retry immediately. Timer and wake refreshes respect
+        // the pause without reading credentials or contacting Anthropic again.
+        if !allowInteraction, let nextAutomaticAttempt, Date() < nextAutomaticAttempt {
+            throw QuotaError.rateLimited
+        }
+
         if allowInteraction {
             setKeychainInteractionAllowed(true)
         }
@@ -65,9 +72,16 @@ actor ClaudeQuotaProvider: QuotaProviding {
             if http.statusCode == 401 || http.statusCode == 403 {
                 throw QuotaError.unauthorized
             }
+            if http.statusCode == 429 {
+                let now = Date()
+                let delay = ClaudeRetryPolicy.delay(retryAfter: http.value(forHTTPHeaderField: "Retry-After"), now: now)
+                nextAutomaticAttempt = now.addingTimeInterval(delay)
+                throw QuotaError.rateLimited
+            }
             throw QuotaError.network("HTTP \(http.statusCode)")
         }
 
+        nextAutomaticAttempt = nil
         return try ClaudeUsageResponse.parseUsage(data)
     }
 

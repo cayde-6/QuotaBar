@@ -3,6 +3,7 @@ enum QuotaError: Error, Sendable, Equatable {
     case notAuthenticated     // no credentials / not signed in
     case tokenExpired         // access token expired — waiting for the CLI to refresh it itself
     case unauthorized         // 401/403 from the backend
+    case rateLimited          // usage lookup was throttled; automatic retries back off
     case network(String)      // network error / timeout, short description
     case malformedResponse    // response shape changed / missing expected fields
     case keychainDenied       // user was prompted and explicitly declined Keychain access
@@ -20,6 +21,7 @@ enum QuotaError: Error, Sendable, Equatable {
         case .notAuthenticated: return "Not signed in"
         case .tokenExpired: return "Token expired — waiting for CLI refresh"
         case .unauthorized: return "Access denied"
+        case .rateLimited: return "Usage check rate limited — retrying later"
         case .network(let reason): return "Network: \(reason)"
         case .malformedResponse: return "Unexpected response format"
         case .keychainDenied: return "Keychain access denied"

@@ -145,6 +145,12 @@ locked Keychain, an expired token, a network failure, a timeout, or `codex`
 installed but signed out. Install the missing CLI or sign in and the icon
 returns on the next refresh; nothing needs restarting.
 
+If Anthropic rate-limits the Claude usage check, QuotaBar shows a warning and
+pauses automatic Claude requests for at least 15 minutes (or longer if the
+server asks). A manual Refresh can retry sooner. QuotaBar keeps any Claude
+numbers fetched earlier in the current session; after a restart, it shows no
+Claude percentage until the usage check succeeds again.
+
 If neither provider is set up, the menu bar shows a single gauge glyph rather
 than collapsing to an empty item, so Settings — and `Quit` — stays reachable.
 
