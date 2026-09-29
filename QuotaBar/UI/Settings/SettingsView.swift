@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Everything that isn't the quota readout itself: surface choice, refresh interval,
-/// launch-at-login, update notice, and Quit. Shown in its own window (see
-/// `SettingsWindowController`) rather than the popover, which is reserved for the two
+/// Everything that isn't the quota readout itself: provider choice, surface choice,
+/// refresh interval, launch-at-login, update notice, and Quit. Shown in its own window (see
+/// `SettingsWindowController`) rather than the popover, which is reserved for
 /// provider cards.
 struct SettingsView: View {
     let store: QuotaStore
@@ -30,6 +30,29 @@ struct SettingsView: View {
                 Text("Appearance")
             } footer: {
                 Text("Where the quota readout lives. The menu bar item stays visible while the widget has nothing to show.")
+            }
+
+            Section {
+                ForEach(QuotaProvider.allCases, id: \.self) { provider in
+                    Toggle(isOn: Binding(
+                        get: { store.isEnabled(provider) },
+                        set: { store.setEnabled(provider, to: $0) }
+                    )) {
+                        HStack(spacing: 8) {
+                            Image(provider.iconName)
+                                .renderingMode(.template)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 16, height: 16)
+                                .foregroundStyle(.secondary)
+                            Text(provider.displayName.capitalized)
+                        }
+                    }
+                }
+            } header: {
+                Text("Providers")
+            } footer: {
+                Text("Hidden providers are not checked. If both are hidden, the menu bar icon stays available for Settings.")
             }
 
             Section {

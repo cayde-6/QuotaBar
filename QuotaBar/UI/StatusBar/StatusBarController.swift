@@ -93,7 +93,7 @@ final class StatusBarController: NSObject {
         let isDark = statusItem.button?.effectiveAppearance
             .bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
 
-        let view = StatusBarView(codex: store.codex, claude: store.claude, isDark: isDark)
+        let view = StatusBarView(codex: store.codex, claude: store.claude, visibleProviders: store.visibleProviders, isDark: isDark)
         let renderer = ImageRenderer(content: view)
         // NSScreen.main isn't necessarily the screen the menu bar item is actually on
         // (e.g. retina + non-retina external display) — prefer the button's own screen.
