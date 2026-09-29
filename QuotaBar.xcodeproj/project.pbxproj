@@ -15,6 +15,7 @@
 		FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */; };
 		906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921546C30E264DF4A56BABCC /* RailPlacement.swift */; };
 		5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */; };
+		B47450D3D5364C3CA606D511 /* ClaudeRetryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Codex/CodexAppServerSession.swift; sourceTree = "<group>"; };
 		921546C30E264DF4A56BABCC /* RailPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/RailPlacement.swift; sourceTree = "<group>"; };
 		D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/SurfaceMode.swift; sourceTree = "<group>"; };
+		3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Claude/ClaudeRetryPolicy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -97,6 +99,7 @@
 				B1FE3F55F566E78BA82D752D /* CodexAppServerSession.swift */,
 				921546C30E264DF4A56BABCC /* RailPlacement.swift */,
 				D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */,
+				3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -217,6 +220,7 @@
 				FB200622C31894286B25AFED /* CodexAppServerSession.swift in Sources */,
 				906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */,
 				5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */,
+				B47450D3D5364C3CA606D511 /* ClaudeRetryPolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
