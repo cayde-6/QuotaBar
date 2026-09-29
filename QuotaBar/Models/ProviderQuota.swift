@@ -9,7 +9,11 @@ struct ProviderQuota: Sendable, Equatable {
     let planWindow: QuotaWindow?
     let fetchedAt: Date
 
-    /// The window to lead with: the short window normally, the plan's own limit on plans
-    /// that have no windows.
-    var headlineWindow: QuotaWindow? { shortWindow ?? planWindow }
+    /// Lead with the shortest available limit. Codex can report only its weekly window
+    /// while the five-hour limit is unavailable.
+    var headlineWindow: QuotaWindow? { shortWindow ?? weeklyWindow ?? planWindow }
+
+    /// A second number is useful only when both rolling windows are present. In
+    /// particular, a weekly-only limit must not appear twice in the menu bar.
+    var secondaryWindow: QuotaWindow? { shortWindow == nil ? nil : weeklyWindow }
 }

@@ -74,12 +74,15 @@ struct StatusBarView: View {
                     .monospacedDigit()
                     .foregroundStyle(palette.percentColor(state.quota?.headlineWindow))
                     .frame(height: 9, alignment: .center)
-                Text(percentText(state.quota?.weeklyWindow))
-                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                    .monospacedDigit()
-                    .foregroundStyle(palette.percentColor(state.quota?.weeklyWindow))
-                    .frame(height: 9, alignment: .center)
+                if let secondaryWindow = state.quota?.secondaryWindow {
+                    Text(percentText(secondaryWindow))
+                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .monospacedDigit()
+                        .foregroundStyle(palette.percentColor(secondaryWindow))
+                        .frame(height: 9, alignment: .center)
+                }
             }
+            .frame(height: 18)
         }
     }
 

@@ -19,8 +19,8 @@
 </p>
 
 QuotaBar puts two compact indicators in the menu bar — one for Codex (OpenAI),
-one for Claude (Anthropic) — each showing the quota you have **left** in the
-short and weekly windows. Click for a small popover. No windows, no Dock icon.
+one for Claude (Anthropic) — showing the quota you have **left** in the
+available limit windows. Click for a small popover. No windows, no Dock icon.
 
 If you'd rather not spend menu bar width on it, the same readout can live in a
 small floating widget you park against a screen edge — see
@@ -45,8 +45,10 @@ have simply doesn't appear.
 
 ## Reading the indicators
 
-Each provider shows two numbers, stacked: the short (5-hour) window on top,
-the weekly window below. Both are **remaining** percentages, not used ones.
+When both windows are available, each provider shows two numbers, stacked:
+the short (5-hour) window on top and the weekly window below. If only one
+window is reported, only its number appears. All numbers are **remaining**
+percentages, not used ones.
 
 | Colour | Remaining |
 |--------|-----------|
@@ -57,8 +59,7 @@ the weekly window below. Both are **remaining** percentages, not used ones.
 The provider icon stays neutral — it follows the menu bar's own light/dark
 appearance — so only the numbers carry meaning. Three other states:
 
-- **`—` instead of a number** — that window has no data. This is normal: the
-  Codex API does not always report both windows.
+- **`—` instead of a number** — no limit data is available yet.
 - **A single `PLAN` column instead of the two windows** — some Codex plans
   (`business`, for one) meter spend against a plan allowance instead of rolling
   5-hour and weekly windows, and report no windows at all. QuotaBar shows that
@@ -84,15 +85,16 @@ and does not itself trigger a refresh.
 or **Both**.
 
 The widget is a small dark strip that floats above your windows, with one cell
-per provider: a ring around the provider's mark for the short (5-hour) window,
-and that window's percentage under it in white. The ring is the provider's own
-colour and stays that colour whatever the number is — unlike the menu bar and
-the limits card, it is not a green / orange / red warning. `—` means that window
+per provider: a ring around the provider's mark for the shortest available
+window, and that window's percentage under it in white. If Codex reports only
+a weekly limit, the ring and percentage show that limit. The ring is the
+provider's own colour and stays that colour whatever the number is — unlike
+the menu bar and the limits card, it is not a green / orange / red warning. `—` means that window
 has no data; `!` means the last refresh failed or the numbers are over 20
 minutes old.
 
-The weekly window isn't on the widget. Click it and a dark card opens beside it
-with both windows, their reset times, when the data was last updated, a
+Click the widget and a dark card opens beside it with the available windows,
+their reset times, when the data was last updated, a
 `Refresh` button and a gear that opens Settings. It closes on Escape or on a
 click anywhere outside it.
 
