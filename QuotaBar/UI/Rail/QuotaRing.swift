@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Single progress ring for one provider's short (5-hour) window, with the provider's
-/// mark centered inside. The weekly window is shown only in the popover now.
+/// Single progress ring for a provider's leading available window, with its mark
+/// centered inside. When Codex has no five-hour window, this shows its weekly limit.
 struct QuotaRing: View {
     let window: QuotaWindow?
     let provider: QuotaProvider

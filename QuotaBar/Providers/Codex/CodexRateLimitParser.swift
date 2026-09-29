@@ -26,8 +26,8 @@ enum CodexRateLimitParser {
     /// windows are present, the longest always wins `weekly`, but the short slot never accepts
     /// a window longer than a day (`windowDurationMins > 1440`): if even the shorter of the two
     /// windows is week/month-scale, there is no real "5 hour" window to show, and a mislabeled
-    /// weekly or monthly number under that heading is worse than an honest "No data" — so
-    /// `short` comes back nil and the "5 hour" row in MenuView shows a placeholder instead.
+    /// weekly or monthly number under that heading is misleading — so `short` comes
+    /// back nil and the UI shows only the weekly limit.
     static func classify(primary: RawWindow?, secondary: RawWindow?) -> (short: RawWindow?, weekly: RawWindow?) {
         let windows = [primary, secondary].compactMap { $0 }
 
@@ -123,7 +123,7 @@ enum CodexRateLimitParser {
 
         // Both windows being absent is a normal state for a fresh account with zero
         // consumption, not an auth failure — real auth errors are caught in
-        // classifyRPCError before we ever get here. Just report "no data" for both.
+        // classifyRPCError before we ever get here. Report that no limit data exists.
         let primary = try primaryDict.map(parseWindow)
         let secondary = try secondaryDict.map(parseWindow)
         let (shortRaw, weeklyRaw) = classify(primary: primary, secondary: secondary)

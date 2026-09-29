@@ -55,14 +55,21 @@ struct ProviderCard: View {
                 }
                 if state.quota?.shortWindow == nil, state.quota?.weeklyWindow == nil, let planWindow = state.quota?.planWindow {
                     // A spend-metered plan (Codex `business`) has no rolling windows at
-                    // all — show its one plan-wide limit instead of two "No data" columns.
+                    // all — show its one plan-wide limit.
                     HStack(alignment: .top, spacing: 12) {
                         QuotaWindowColumn(title: "PLAN", window: planWindow)
                     }
                 } else {
                     HStack(alignment: .top, spacing: 12) {
-                        QuotaWindowColumn(title: "5 HOUR", window: state.quota?.shortWindow)
-                        QuotaWindowColumn(title: "WEEKLY", window: state.quota?.weeklyWindow)
+                        if let shortWindow = state.quota?.shortWindow {
+                            QuotaWindowColumn(title: "5 HOUR", window: shortWindow)
+                        }
+                        if let weeklyWindow = state.quota?.weeklyWindow {
+                            QuotaWindowColumn(title: "WEEKLY", window: weeklyWindow)
+                        }
+                        if state.quota?.shortWindow == nil, state.quota?.weeklyWindow == nil {
+                            QuotaWindowColumn(title: "LIMIT", window: nil)
+                        }
                     }
                 }
             }

@@ -228,6 +228,27 @@ struct CodexRateLimitParserParseTests {
 
         #expect(quota.weeklyWindow?.remainingPercentage == 96)
         #expect(quota.weeklyWindow?.resetsAt == Date(timeIntervalSince1970: TimeInterval(weeklyReset)))
+        #expect(quota.headlineWindow == quota.shortWindow)
+        #expect(quota.secondaryWindow == quota.weeklyWindow)
+    }
+
+    @Test("a weekly-only payload becomes the single leading limit")
+    func weeklyOnlyPayload() throws {
+        let payload: [String: Any] = [
+            "rateLimits": [
+                "primary": [
+                    "usedPercent": 24,
+                    "windowDurationMins": 10080,
+                ],
+                "secondary": NSNull(),
+            ],
+        ]
+        let quota = try CodexRateLimitParser.parseRateLimits(payload)
+
+        #expect(quota.shortWindow == nil)
+        #expect(quota.weeklyWindow?.remainingPercentage == 76)
+        #expect(quota.headlineWindow == quota.weeklyWindow)
+        #expect(quota.secondaryWindow == nil)
     }
 
     @Test("a window missing usedPercent throws malformedResponse")
@@ -249,6 +270,8 @@ struct CodexRateLimitParserParseTests {
         #expect(quota.shortWindow == nil)
         #expect(quota.weeklyWindow == nil)
         #expect(quota.planWindow == nil)
+        #expect(quota.headlineWindow == nil)
+        #expect(quota.secondaryWindow == nil)
     }
 
     @Test("a business-plan payload with no windows surfaces individualLimit as planWindow")
@@ -271,6 +294,8 @@ struct CodexRateLimitParserParseTests {
         #expect(quota.weeklyWindow == nil)
         #expect(quota.planWindow?.remainingPercentage == 100)
         #expect(quota.planWindow?.resetsAt == Date(timeIntervalSince1970: 1_790_812_800))
+        #expect(quota.headlineWindow == quota.planWindow)
+        #expect(quota.secondaryWindow == nil)
     }
 
     @Test("planWindow is suppressed when a rolling window is present, even with individualLimit in the payload")
@@ -289,5 +314,7 @@ struct CodexRateLimitParserParseTests {
         let quota = try CodexRateLimitParser.parseRateLimits(payload)
         #expect(quota.shortWindow != nil)
         #expect(quota.planWindow == nil)
+        #expect(quota.headlineWindow == quota.shortWindow)
+        #expect(quota.secondaryWindow == nil)
     }
 }
