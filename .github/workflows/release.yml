@@ -34,28 +34,8 @@ jobs:
           set -euo pipefail
 
           last_tag=$(git tag -l 'v*' | sort -V | tail -1)
-
-          if [ -z "$last_tag" ]; then
-            base_version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" QuotaBar/Info.plist)
-            case "$base_version" in
-              *.*.*) next_version="$base_version" ;;
-              *.*) next_version="${base_version}.0" ;;
-              *) next_version="${base_version}.0.0" ;;
-            esac
-          else
-            tag_version="${last_tag#v}"
-            if ! [[ "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "::error::Latest tag '$last_tag' is not a valid vX.Y.Z semver tag, refusing to guess the next version" >&2
-              exit 1
-            fi
-            IFS='.' read -r major minor patch <<< "$tag_version"
-            next_version="${major}.${minor}.$((patch + 1))"
-          fi
-
-          if ! [[ "$next_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Computed version '$next_version' is not a valid semver, aborting" >&2
-            exit 1
-          fi
+          base_version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" QuotaBar/Info.plist)
+          next_version=$(bash scripts/next-version.sh "$base_version" "$last_tag")
 
           echo "last_tag=${last_tag}" >> "$GITHUB_OUTPUT"
           echo "next_version=${next_version}" >> "$GITHUB_OUTPUT"
