@@ -31,18 +31,17 @@ struct MenuView: View {
     /// see the `maxHeight: .infinity` frame on providerCard, which is what actually makes
     /// both cards match the taller one's height.
     ///
-    /// A provider that isn't set up on this machine (see `ProviderState.isMissing`) is
-    /// dropped from the row entirely — its card doesn't render at all, and the remaining
-    /// card fills the row via its own `maxWidth: .infinity` frame. When both are missing,
+    /// A provider hidden in Settings or not set up on this machine is dropped from the
+    /// row entirely — its card doesn't render at all, and the remaining
+    /// card fills the row via its own `maxWidth: .infinity` frame. When none remain,
     /// a single-line placeholder message takes the row's place instead.
     @ViewBuilder
     private var providerCardsRow: some View {
-        let codexMissing = store.codex.isMissing(for: .codex)
-        let claudeMissing = store.claude.isMissing(for: .claude)
+        let providers = store.visibleProviders
 
         let cards = HStack(alignment: .top, spacing: 10) {
-            if codexMissing && claudeMissing {
-                let placeholder = Text("No Claude Code or Codex found")
+            if providers.isEmpty {
+                let placeholder = Text("No providers to show. Open Settings to choose one.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,11 +55,8 @@ struct MenuView: View {
                     placeholder.glassCard().cardEdge()
                 }
             } else {
-                if !codexMissing {
-                    ProviderCard(provider: .codex, state: store.codex, style: style)
-                }
-                if !claudeMissing {
-                    ProviderCard(provider: .claude, state: store.claude, style: style)
+                ForEach(providers, id: \.self) { provider in
+                    ProviderCard(provider: provider, state: provider == .codex ? store.codex : store.claude, style: style)
                 }
             }
         }
@@ -114,6 +110,7 @@ struct MenuView: View {
                 store.refresh(userInitiated: true)
             }
             .glassButton()
+            .disabled(store.enabledProviders.isEmpty)
             // Plain glass buttons render their label in a washed-out secondary-ish
             // tone that's nearly invisible on light glass — force real contrast.
             .foregroundStyle(.primary)

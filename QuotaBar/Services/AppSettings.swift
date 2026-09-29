@@ -6,6 +6,11 @@ enum AppSettings {
     private static let refreshIntervalDefaultsKey = "refreshIntervalMinutes"
     private static let defaultRefreshIntervalMinutes = 5
 
+    static var enabledProviders: Set<QuotaProvider> {
+        get { ProviderSelection.load(from: .standard) }
+        set { ProviderSelection.save(newValue, to: .standard) }
+    }
+
     /// One of `validRefreshIntervalsMinutes`. Falls back to the default for a never-set
     /// key (`integer(forKey:)` reads 0, which isn't a valid option) or any other value
     /// outside the fixed list — e.g. leftover garbage from a future version with more

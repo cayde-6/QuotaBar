@@ -37,7 +37,7 @@ and drag `QuotaBar.app` onto the `Applications` alias next to it.
 Requires **macOS 14 (Sonoma) or later**, plus whichever CLIs you want to
 track — [`codex`](https://github.com/openai/codex) and/or
 [Claude Code](https://claude.com/claude-code), signed in. A provider you don't
-have simply doesn't appear.
+have simply doesn't appear. You can also hide either provider in Settings.
 
 > **First launch is blocked by Gatekeeper.** These builds are ad-hoc signed,
 > not signed with an Apple Developer ID. Right-click the app and choose
@@ -84,6 +84,11 @@ and does not itself trigger a refresh.
 `Show as` in Settings picks the surface: **Menu bar** (the default), **Widget**,
 or **Both**.
 
+The **Providers** switches let you show Codex, Claude, or both. A hidden
+provider disappears from every readout and QuotaBar stops checking its usage.
+Turning it back on starts a refresh immediately. If both are hidden, the menu
+bar item stays available so you can reopen Settings.
+
 The widget is a small dark strip that floats above your windows, with one cell
 per provider: a ring around the provider's mark for the shortest available
 window, and that window's percentage under it in white. If Codex reports only
@@ -119,7 +124,7 @@ bar.
 
 The widget stays visible on every Space and over full-screen apps — being
 visible while something else is filling the screen is most of the point. If
-neither provider is set up there is nothing to draw and the widget doesn't
+neither provider is visible there is nothing to draw and the widget doesn't
 appear at all; in that case the menu bar item stays visible whatever `Show as`
 says, so Settings — and `Quit` — never becomes unreachable.
 
@@ -127,8 +132,8 @@ says, so Settings — and `Quit` — never becomes unreachable.
 
 There is no Dock icon and no menu bar menu, so Settings opens from the gear in
 whichever readout you have: the menu bar item's popover, or the widget's card.
-It holds the surface choice, the refresh interval, `Launch at Login`, the
-new-version notice, and `Quit`. Escape or ⌘W closes it.
+It holds the provider switches, surface choice, refresh interval,
+`Launch at Login`, the new-version notice, and `Quit`. Escape or ⌘W closes it.
 
 <details>
 <summary><b>When exactly a provider is hidden</b></summary>
@@ -151,8 +156,8 @@ server asks). A manual Refresh can retry sooner. QuotaBar keeps any Claude
 numbers fetched earlier in the current session; after a restart, it shows no
 Claude percentage until the usage check succeeds again.
 
-If neither provider is set up, the menu bar shows a single gauge glyph rather
-than collapsing to an empty item, so Settings — and `Quit` — stays reachable.
+If no provider is visible, the menu bar shows a single gauge glyph rather than
+collapsing to an empty item, so Settings — and `Quit` — stays reachable.
 
 </details>
 

@@ -22,12 +22,12 @@ struct RailView: View {
     /// crowd each other.
     static let contentEdgeInset: CGFloat = 34
 
-    /// Codex first, then Claude — same order as the menu bar and popover — excluding any
-    /// provider that isn't set up on this machine (`ProviderState.isMissing`). The
+    /// Codex first, then Claude — same order as the menu bar and popover — excluding
+    /// providers hidden in Settings or not set up on this machine. The
     /// controller calls this exact method to size and position the panel, so it and the
     /// view can never disagree about which providers are shown.
     static func visibleProviders(store: QuotaStore) -> [QuotaProvider] {
-        [.codex, .claude].filter { !state(for: $0, in: store).isMissing(for: $0) }
+        store.visibleProviders
     }
 
     /// The panel's size for `edge`: a single-cell-wide column of `providerCount` cells on

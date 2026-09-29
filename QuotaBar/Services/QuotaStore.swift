@@ -8,7 +8,40 @@ import Observation
 final class QuotaStore {
     var codex = ProviderState()
     var claude = ProviderState()
-    var lastSuccessfulUpdate: Date?
+
+    var lastSuccessfulUpdate: Date? {
+        [
+            isEnabled(.codex) ? codex.quota?.fetchedAt : nil,
+            isEnabled(.claude) ? claude.quota?.fetchedAt : nil,
+        ].compactMap { $0 }.max()
+    }
+
+    private(set) var enabledProviders: Set<QuotaProvider> = AppSettings.enabledProviders {
+        didSet {
+            AppSettings.enabledProviders = enabledProviders
+            onUpdate?()
+        }
+    }
+
+    var visibleProviders: [QuotaProvider] {
+        ProviderSelection.visibleProviders(enabled: enabledProviders, codex: codex, claude: claude)
+    }
+
+    func isEnabled(_ provider: QuotaProvider) -> Bool {
+        enabledProviders.contains(provider)
+    }
+
+    func setEnabled(_ provider: QuotaProvider, to enabled: Bool) {
+        guard isEnabled(provider) != enabled else { return }
+        if enabled {
+            enabledProviders.insert(provider)
+            // The user explicitly asked to see this provider again, so fetch now
+            // instead of waiting for the next periodic refresh.
+            refresher(for: provider).refresh(userInitiated: true)
+        } else {
+            enabledProviders.remove(provider)
+        }
+    }
 
     /// True while at least one provider has a fetch in flight. A stored flag, updated
     /// from ProviderRefresher's onEvent callbacks, rather than computed on read — plain
@@ -77,8 +110,13 @@ final class QuotaStore {
     /// post-wake refresh, or a rewritten Keychain item could pop up a system dialog
     /// completely unprompted.
     func refresh(userInitiated: Bool) {
-        codexRefresher.refresh(userInitiated: userInitiated)
-        claudeRefresher.refresh(userInitiated: userInitiated)
+        for provider in QuotaProvider.allCases where isEnabled(provider) {
+            refresher(for: provider).refresh(userInitiated: userInitiated)
+        }
+    }
+
+    private func refresher(for provider: QuotaProvider) -> ProviderRefresher {
+        provider == .codex ? codexRefresher : claudeRefresher
     }
 
     private func apply(_ event: ProviderRefreshEvent, to state: ReferenceWritableKeyPath<QuotaStore, ProviderState>) {
@@ -88,7 +126,6 @@ final class QuotaStore {
         case .finished(.success(let quota)):
             self[keyPath: state].quota = quota
             self[keyPath: state].lastError = nil
-            lastSuccessfulUpdate = Date()
         case .finished(.failure(let error)):
             self[keyPath: state].lastError = error
         case .timedOut:
@@ -99,7 +136,9 @@ final class QuotaStore {
     }
 
     private var mostRecentAttempt: Date? {
-        switch (codex.lastAttempt, claude.lastAttempt) {
+        let codexAttempt = isEnabled(.codex) ? codex.lastAttempt : nil
+        let claudeAttempt = isEnabled(.claude) ? claude.lastAttempt : nil
+        switch (codexAttempt, claudeAttempt) {
         case let (a?, b?): return max(a, b)
         case let (a?, nil): return a
         case let (nil, b?): return b

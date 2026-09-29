@@ -9,6 +9,7 @@ import SwiftUI
 struct StatusBarView: View {
     let codex: ProviderState
     let claude: ProviderState
+    let visibleProviders: [QuotaProvider]
     let isDark: Bool
 
     private var palette: StatusBarPalette { StatusBarPalette(isDark: isDark) }
@@ -20,28 +21,21 @@ struct StatusBarView: View {
             .fixedSize()
     }
 
-    /// Hides a provider's block entirely when it isn't set up on this machine (see
-    /// `ProviderState.isMissing`). When both are missing, a fixed-height placeholder
-    /// glyph takes their place instead of an empty view, so NSStatusItem never collapses
+    /// Hides providers disabled in Settings or missing on this machine. When none
+    /// remain, a fixed-height placeholder glyph takes their place, so NSStatusItem never collapses
     /// to a zero-size, unclickable item. The height matches a normal two-line block (two
     /// 9pt rows) so the item's height doesn't jump between states.
     @ViewBuilder
     private var content: some View {
-        let codexMissing = codex.isMissing(for: .codex)
-        let claudeMissing = claude.isMissing(for: .claude)
-
-        if codexMissing && claudeMissing {
+        if visibleProviders.isEmpty {
             Image(systemName: "gauge.with.dots.needle.bottom.50percent")
                 .font(.system(size: 13))
                 .foregroundStyle(palette.neutralColor)
                 .frame(height: 18)
         } else {
             HStack(spacing: 7) {
-                if !codexMissing {
-                    providerBlock(.codex, state: codex)
-                }
-                if !claudeMissing {
-                    providerBlock(.claude, state: claude)
+                ForEach(visibleProviders, id: \.self) { provider in
+                    providerBlock(provider, state: provider == .codex ? codex : claude)
                 }
             }
         }

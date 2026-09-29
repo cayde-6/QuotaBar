@@ -16,6 +16,9 @@
 		906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921546C30E264DF4A56BABCC /* RailPlacement.swift */; };
 		5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */; };
 		B47450D3D5364C3CA606D511 /* ClaudeRetryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */; };
+		4FD3132B52494E6A8A08313C /* ProviderSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5053E1462374C23AA929CA0 /* ProviderSelection.swift */; };
+		1066198343FF41C1A6A9D8E5 /* QuotaProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32B25F6689044E1A00817EA /* QuotaProvider.swift */; };
+		021FFF95034C40C5B8B3A397 /* ProviderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB4E0E5B95E49CAB1627552 /* ProviderState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +33,9 @@
 		921546C30E264DF4A56BABCC /* RailPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/RailPlacement.swift; sourceTree = "<group>"; };
 		D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/SurfaceMode.swift; sourceTree = "<group>"; };
 		3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Providers/Claude/ClaudeRetryPolicy.swift; sourceTree = "<group>"; };
+		D5053E1462374C23AA929CA0 /* ProviderSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/ProviderSelection.swift; sourceTree = "<group>"; };
+		B32B25F6689044E1A00817EA /* QuotaProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/QuotaProvider.swift; sourceTree = "<group>"; };
+		ECB4E0E5B95E49CAB1627552 /* ProviderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/ProviderState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -100,6 +106,9 @@
 				921546C30E264DF4A56BABCC /* RailPlacement.swift */,
 				D7711B54EC6E71D704D54CBF /* SurfaceMode.swift */,
 				3CE91A0A57784E18A684D2AF /* ClaudeRetryPolicy.swift */,
+				D5053E1462374C23AA929CA0 /* ProviderSelection.swift */,
+				B32B25F6689044E1A00817EA /* QuotaProvider.swift */,
+				ECB4E0E5B95E49CAB1627552 /* ProviderState.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -221,6 +230,9 @@
 				906D696B9BFE44DCA87EB79E /* RailPlacement.swift in Sources */,
 				5EEFB509A35597D9F471B053 /* SurfaceMode.swift in Sources */,
 				B47450D3D5364C3CA606D511 /* ClaudeRetryPolicy.swift in Sources */,
+				4FD3132B52494E6A8A08313C /* ProviderSelection.swift in Sources */,
+				1066198343FF41C1A6A9D8E5 /* QuotaProvider.swift in Sources */,
+				021FFF95034C40C5B8B3A397 /* ProviderState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

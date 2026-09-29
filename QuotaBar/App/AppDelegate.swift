@@ -82,7 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         wasRailVisible = railVisible
     }
 
-    /// Re-applies the surface mode whenever the set of set-up providers could have
+    /// Re-applies the surface mode whenever the set of visible providers could have
     /// changed, since that's what the menu-bar-always-visible fallback above depends on.
     /// Re-registers itself after every fire — `withObservationTracking` only observes up
     /// to its next mutation, not indefinitely. This is also what drives RailPanelController
@@ -93,6 +93,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         withObservationTracking {
             _ = store.codex
             _ = store.claude
+            _ = store.enabledProviders
         } onChange: { [weak self] in
             Task { @MainActor in
                 self?.applySurfaceMode()
