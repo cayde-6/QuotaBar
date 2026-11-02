@@ -11,6 +11,8 @@ struct StatusBarView: View {
     let claude: ProviderState
     let visibleProviders: [QuotaProvider]
     let isDark: Bool
+    let currentDate: Date
+    let refreshIntervalMinutes: Int
 
     private var palette: StatusBarPalette { StatusBarPalette(isDark: isDark) }
 
@@ -83,7 +85,7 @@ struct StatusBarView: View {
     /// True when the icon should carry a "!" — either the last attempt failed,
     /// or the data on screen is old enough to no longer be trustworthy.
     private func hasProblem(_ state: ProviderState) -> Bool {
-        state.lastError != nil || state.isStale
+        state.lastError != nil || state.isStale(at: currentDate, refreshIntervalMinutes: refreshIntervalMinutes)
     }
 
     private func percentText(_ window: QuotaWindow?) -> String {

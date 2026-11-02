@@ -9,6 +9,9 @@ final class QuotaStore {
     var codex = ProviderState()
     var claude = ProviderState()
 
+    /// Updated on fetch events, setting changes, wake, and the next freshness deadline.
+    private(set) var currentDate = Date()
+
     var lastSuccessfulUpdate: Date? {
         [
             isEnabled(.codex) ? codex.quota?.fetchedAt : nil,
@@ -19,7 +22,7 @@ final class QuotaStore {
     private(set) var enabledProviders: Set<QuotaProvider> = AppSettings.enabledProviders {
         didSet {
             AppSettings.enabledProviders = enabledProviders
-            onUpdate?()
+            updateFreshness()
         }
     }
 
@@ -56,6 +59,7 @@ final class QuotaStore {
         didSet {
             AppSettings.refreshIntervalMinutes = refreshIntervalMinutes
             refreshScheduler.startAutoRefreshLoop(intervalMinutes: refreshIntervalMinutes)
+            updateFreshness()
         }
     }
 
@@ -89,10 +93,14 @@ final class QuotaStore {
         claudeRefresher.onEvent = { [weak self] event in self?.apply(event, to: \.claude) }
         refreshScheduler.onTick = { [weak self] userInitiated in self?.refresh(userInitiated: userInitiated) }
         refreshScheduler.mostRecentAttempt = { [weak self] in self?.mostRecentAttempt }
+        refreshScheduler.onFreshnessCheck = { [weak self] date in
+            self?.updateFreshness(at: date)
+        }
         updateChecker.startPolling()
     }
 
     func start() {
+        updateFreshness()
         refresh(userInitiated: true) // the one automatic refresh allowed to prompt for Keychain access
         refreshScheduler.startAutoRefreshLoop(intervalMinutes: refreshIntervalMinutes)
         refreshScheduler.observeSystemWake()
@@ -132,6 +140,20 @@ final class QuotaStore {
             self[keyPath: state].lastError = .timedOut
         }
         isRefreshing = codexRefresher.isRefreshing || claudeRefresher.isRefreshing
+        updateFreshness()
+    }
+
+    private func updateFreshness(at date: Date = Date()) {
+        currentDate = date
+        let nextDeadline = QuotaProvider.allCases
+            .filter { isEnabled($0) }
+            .compactMap { provider in
+                let state = provider == .codex ? codex : claude
+                return state.freshnessDeadline(refreshIntervalMinutes: refreshIntervalMinutes)
+            }
+            .filter { $0 > date }
+            .min()
+        refreshScheduler.scheduleFreshnessCheck(at: nextDeadline)
         onUpdate?()
     }
 

@@ -28,6 +28,13 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Check release version selection
+        run: bash scripts/test-next-version.sh
+
+      - name: Run tests
+        run: |
+          xcodebuild test -project QuotaBar.xcodeproj -scheme QuotaBar -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
       - name: Determine next version
         id: version
         run: |

@@ -56,7 +56,13 @@ struct MenuView: View {
                 }
             } else {
                 ForEach(providers, id: \.self) { provider in
-                    ProviderCard(provider: provider, state: provider == .codex ? store.codex : store.claude, style: style)
+                    ProviderCard(
+                        provider: provider,
+                        state: provider == .codex ? store.codex : store.claude,
+                        style: style,
+                        currentDate: store.currentDate,
+                        refreshIntervalMinutes: store.refreshIntervalMinutes
+                    )
                 }
             }
         }

@@ -134,7 +134,7 @@ struct RailView: View {
     }
 
     private func hasProblem(_ state: ProviderState) -> Bool {
-        state.lastError != nil || state.isStale
+        state.lastError != nil || state.isStale(at: store.currentDate, refreshIntervalMinutes: store.refreshIntervalMinutes)
     }
 
     private func percentText(_ window: QuotaWindow?) -> String {
