@@ -234,7 +234,9 @@ final class RailPanelController {
             // `runAnimationGroup` returns, because `applyVisibility` can call `resize(_:)`,
             // which does a synchronous (non-animator) `setFrame` — running that on the next
             // line would cut the snap animation off on the very first frame.
-            self?.applyVisibility()
+            Task { @MainActor in
+                self?.applyVisibility()
+            }
         })
     }
 

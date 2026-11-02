@@ -6,10 +6,14 @@ struct ProviderState: Sendable {
     var lastError: QuotaError?       // error from the most recent attempt, nil on success
     var lastAttempt: Date?
 
-    /// True when there is no data yet, or the data is older than 20 minutes.
-    var isStale: Bool {
-        guard let fetchedAt = quota?.fetchedAt else { return true }
-        return Date().timeIntervalSince(fetchedAt) > 20 * 60
+    /// A snapshot stays fresh for the interval chosen in Settings.
+    func freshnessDeadline(refreshIntervalMinutes: Int) -> Date? {
+        quota?.fetchedAt.addingTimeInterval(TimeInterval(refreshIntervalMinutes) * 60)
+    }
+
+    func isStale(at date: Date, refreshIntervalMinutes: Int) -> Bool {
+        guard let deadline = freshnessDeadline(refreshIntervalMinutes: refreshIntervalMinutes) else { return true }
+        return date >= deadline
     }
 
     /// True when this provider has never produced valid data and the last error

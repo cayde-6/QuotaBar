@@ -65,9 +65,9 @@ appearance — so only the numbers carry meaning. Three other states:
   5-hour and weekly windows, and report no windows at all. QuotaBar shows that
   allowance and its reset date in their place.
 - **`!` next to the icon** — the last refresh failed, or the data on screen is
-  older than 20 minutes. The last known-good numbers stay visible; open the
-  popover to see what went wrong. The reason is kept to a line or two so it
-  can't push the numbers off the card — hover it to read one that got cut off.
+  at least one selected refresh interval old. The last known-good numbers stay
+  visible; open the popover to see what went wrong. The reason is kept to a line
+  or two so it can't push the numbers off the card — hover it to read one that got cut off.
 - **No icon at all** — that provider isn't set up on this machine, so it drops
   out of the menu bar and the popover entirely instead of sitting there
   permanently marked `!` over nothing.
@@ -78,6 +78,10 @@ still updates and displays normally.
 `Refresh every` in Settings offers 1, 5, 15, 30 or 60 minutes (default 5).
 The choice persists across launches. Changing it restarts the timer immediately
 and does not itself trigger a refresh.
+Data becomes stale after the selected refresh interval (for example, 60 minutes
+when refreshing hourly). Changing the interval immediately re-evaluates existing
+data. Age checks run at the next snapshot expiry and after waking from sleep;
+there is no separate minute-by-minute timer.
 
 ## Where the readout lives
 
@@ -95,8 +99,8 @@ window, and that window's percentage under it in white. If Codex reports only
 a weekly limit, the ring and percentage show that limit. The ring is the
 provider's own colour and stays that colour whatever the number is — unlike
 the menu bar and the limits card, it is not a green / orange / red warning. `—` means that window
-has no data; `!` means the last refresh failed or the numbers are over 20
-minutes old.
+has no data; `!` means the last refresh failed or the numbers are at least one
+selected refresh interval old.
 
 Click the widget and a dark card opens beside it with the available windows,
 their reset times, when the data was last updated, a

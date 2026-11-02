@@ -5,6 +5,8 @@ struct ProviderCard: View {
     let provider: QuotaProvider
     let state: ProviderState
     let style: MenuStyle
+    let currentDate: Date
+    let refreshIntervalMinutes: Int
 
     var body: some View {
         // Text and level colors (QuotaLevel.menuColor) need no adjustment for the dark
@@ -83,7 +85,7 @@ struct ProviderCard: View {
     private func warningText(for state: ProviderState) -> String? {
         guard state.quota != nil else { return nil }
         if let error = state.lastError { return error.message }
-        if state.isStale { return "Data is stale" }
+        if state.isStale(at: currentDate, refreshIntervalMinutes: refreshIntervalMinutes) { return "Data is stale" }
         return nil
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CE1539AA282C4239A8820111 /* RefreshScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1539AA282C4239A8820112 /* RefreshScheduler.swift */; };
 		F821C3879D3144FEBC9FF5DA /* QuotaError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660D089341274D3185826784 /* QuotaError.swift */; };
 		9549BB9C6E494CD590824509 /* QuotaWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA627F44AC7C43D1AEADA129 /* QuotaWindow.swift */; };
 		527E943244294A608449B4C9 /* ProviderQuota.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0603EC38031F4DC3B43EFE1E /* ProviderQuota.swift */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CE1539AA282C4239A8820112 /* RefreshScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Services/RefreshScheduler.swift; sourceTree = "<group>"; };
 		054BE94558145E6C021E1DCF /* QuotaBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuotaBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92223629264D4DF79A981699 /* QuotaBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuotaBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		660D089341274D3185826784 /* QuotaError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaBar/Models/QuotaError.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				D5053E1462374C23AA929CA0 /* ProviderSelection.swift */,
 				B32B25F6689044E1A00817EA /* QuotaProvider.swift */,
 				ECB4E0E5B95E49CAB1627552 /* ProviderState.swift */,
+				CE1539AA282C4239A8820112 /* RefreshScheduler.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -233,6 +236,7 @@
 				4FD3132B52494E6A8A08313C /* ProviderSelection.swift in Sources */,
 				1066198343FF41C1A6A9D8E5 /* QuotaProvider.swift in Sources */,
 				021FFF95034C40C5B8B3A397 /* ProviderState.swift in Sources */,
+				CE1539AA282C4239A8820111 /* RefreshScheduler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 /// Everything that isn't the quota readout itself: provider choice, surface choice,
 /// refresh interval, launch-at-login, update notice, and Quit. Shown in its own window (see
@@ -6,6 +7,7 @@ import SwiftUI
 /// provider cards.
 struct SettingsView: View {
     let store: QuotaStore
+    @State private var launchAtLoginStatus = LaunchAtLogin.status
 
     var body: some View {
         Form {
@@ -83,9 +85,9 @@ struct SettingsView: View {
                         SettingsRowIcon(systemName: "power", tint: .orange)
                         Text("Launch at Login")
                         Spacer()
-                        LaunchAtLoginToggle()
+                        LaunchAtLoginToggle(status: $launchAtLoginStatus)
                     }
-                    if LaunchAtLogin.status == .requiresApproval {
+                    if launchAtLoginStatus == .requiresApproval {
                         Text("Approve QuotaBar in System Settings → General → Login Items.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
@@ -116,6 +118,16 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 460)
+        .onAppear {
+            launchAtLoginStatus = LaunchAtLogin.status
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            // Also fires when the retained settings window is reopened or refocused.
+            launchAtLoginStatus = LaunchAtLogin.status
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            launchAtLoginStatus = LaunchAtLogin.status
+        }
     }
 }
 
